@@ -433,8 +433,60 @@ public class Kmeans {
 	
 	/** 
 	 * Noise remove task
+	 * A cluster is considered as a noise if it contains only few instances
+	 * To tackle the atask of noise removal, we should set the FALSE threshold for noise cluster
+	 * @param: FALSE threshold = percentage of full data which indicates threshold for noise cluster size
+	 * @param: number of cluster
+	 * @param: Distance Algorithm (Euclidean or Mahattan)
 	 */
-	public void noiseRemove () {
+	public void noiseRemove (Double false_threshold, int cluster, String distanceAlgorithm) {
+		//setting for all
+		this.setExperimentType(0); // for taking all training data in training step
+		this.setCluster(cluster);
+		this.setDistanceAlgorithm(distanceAlgorithm);
+		prepareData();
+		if (trainSet.length != this.reader.numInstances) {
+			try {
+				throw new Exception ();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				System.err.println("Kmean Noise Remove error in size of training data");
+				e.printStackTrace();
+			}
+		}
+		cluster(); //run clustering with this setting
+		
+		String output = "Kmean clustering\n";
+		output += "Noise Removal task\n";
+		output += "Distance algorithm: " + this.dfunction + "\n";
+		output += "Number of cluster: " + this.num_cluster + "\n";
+		output += "Max iterator: " + this.maxIterator + "\n";
+		output += "====================\n";
+		output += "Noise removing on " + trainSet.length + " instances\n";
+		output += "False threshold for noise removeing : "+ false_threshold + "%\n";
+		output += "Missing values globally replaced with mean method\n";
+		output += "Cluster centroids:\n";
+		output += "\t " + this.reader.attributeNames + "\n";
+		for (int i = 0; i<this.num_cluster; i++) {
+			output += "Cluster " + i + ":\t" + this._centre[i].toInforString(this.reader.getAttributeType()) + "\n";
+			
+		}
+		output += "=========Clustering result===========\n";
+		for (int i =0; i<this.num_cluster; i++) {
+			String tmp = String.format("%2.3f", (double) this._centre[i].elements.numInstance/ trainSet.length * 100);
+			output += "Cluster " + i + ":\t" + this._centre[i].elements.numInstance + "("+ tmp + " %)\n";
+		}
+		output += "Noise Clusters (instances belong to those clusters will be considered noise\n";
+		for (int i = 0; i< this.num_cluster; i++) {
+			
+			if (_centre[i].elements.numInstance < false_threshold * trainSet.length / 100) {
+				output += "===>\t";
+				output += "Cluster number " + i + ": " + _centre[i].toInforString(this.reader.getAttributeType()) + "\n";
+				output += "Instances: \n";
+				output += _centre[i].elements.getInfor() + "\n";
+			}
+		}
+		this.out = new Output (output);
 		
 	}
 	
