@@ -97,6 +97,22 @@ public class MainScreen extends JPanel {
 			}
 		});
 	    
+	    dbscan.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				clusterPanel.updateOption(false);
+				clusterPanel.repaint();
+			}
+		});
+	    
+	    kmeans.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				clusterPanel.updateOption(true);
+				clusterPanel.repaint();
+			}
+		});
+	    
 	    showData.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
