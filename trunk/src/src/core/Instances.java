@@ -90,14 +90,16 @@ public class Instances {
 		this.numInstance = 0;
 	}
 	
-	public void printInfor () {
-		System.out.println("Information of data");
-		System.out.println("Number of instances: " + this.numInstance);
-		System.out.println("Number of Attribute: " + this.numAttribute);
-		System.out.println("Attributes: " + this.attributeName);
-		for (int i = 0; i<5; i++) {
-			System.out.println(this.getInstance(i).data + " " + this.getInstance(i).originalData);
+	public String getInfor () {
+//		System.out.println("Information of data");
+//		System.out.println("Number of instances: " + this.numInstance);
+//		System.out.println("Number of Attribute: " + this.numAttribute);
+//		System.out.println("Attributes: " + this.attributeName);
+		String outp = "";
+		for (int i = 0; i<this.numInstance; i++) {
+			outp += i + "\t" + this.getInstance(i).originalData + "\n";
 		}
+		return outp;
 	}
 	
 }

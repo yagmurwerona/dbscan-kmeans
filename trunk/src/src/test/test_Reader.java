@@ -11,6 +11,6 @@ public class test_Reader {
 		System.out.println(r.attributeNames);
 		
 		Instances data = r.getData();
-		data.printInfor();
+		
 	}
 }
