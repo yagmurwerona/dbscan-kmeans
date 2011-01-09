@@ -11,12 +11,20 @@ import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.Vector;
 
+/**
+ * This is to read the input file (which has a same format to weka ARFF's)
+ * The instances are stored in the Instances attribute
+ * It take the "input file name" to parameters of constructor
+ * @author giangbinhtran
+ *
+ */
 public class InputReader {
 	public Instances data = new Instances();
 	private String filename;
 	public int numAttribute = 0;
 	public int numInstances = 0;
 	public Vector<String> attributeNames = new Vector<String> ();
+	private Vector<String> _attributeValues = new Vector<String> ();
 	private Hashtable <String, Double> hashValue = new Hashtable <String, Double> ();
 	private ArrayList <Integer> flag = new ArrayList <Integer> (); // 1 if the relative attribute is NUMERIC, 0 vice versa
 	private Constant C = new Constant();
@@ -63,12 +71,14 @@ public class InputReader {
 							if (splitLine[2].compareTo(C._NUMERIC) == 0) {
 								// This is the numeric type data
 								flag.add(1);
+								this._attributeValues.add(C._NUMERIC);
 							}
 							else {// this is the nominal type data
 								//Convert nomial value to double value - using order
 								flag.add(0);
 								splitLine[2] = splitLine[2].replace("{", "");
 								splitLine[2] = splitLine[2].replace("}", "");
+								this._attributeValues.add(splitLine[2]); 
 								String values[] = splitLine[2].split(",");
 								for (int i = 0; i<values.length; i++) {
 //									
@@ -210,5 +220,9 @@ public class InputReader {
 	
 	public Instances getData () {
 		return this.data;
+	}
+	
+	public Vector<String> getAttributeType () {
+		return this._attributeValues;
 	}
 }
