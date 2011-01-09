@@ -10,16 +10,18 @@ import core.*;
  * The input is read throught Reader
  * the output of experiemnt is stored in the Output 
  * @author giangbinhtran
- * This is free sortware and can be distributed for any purpose with GNU license
+ * This is free software and can be distributed for any purpose with GNU license
  */
 public class Kmeans {
 	private Output out;
 	private InputReader reader;
 	private int num_cluster;
 	private String dfunction;
-	private int maxIterator;
+	private int maxIterator = 500;
 	private String filename = "";
-	private int experimentType = 66; // Default train on 100% data
+	private int experimentType = 66; // by default train on 100% data
+	private int _iterator = 0;
+	private int _without = -1; // by default: dont choose any attribute as the target attribute
 	
 	private String targetAttribute = "";
 	private String testfile = "";
@@ -38,7 +40,6 @@ public class Kmeans {
 		num_cluster = 3; //by default 3
 		this._centre = new Centre[num_cluster]; 
 		dfunction = "Euclidean"; // by default
-		maxIterator = 100; 
 	}
 	/**
 	 * Constructor fucntion 
@@ -56,8 +57,10 @@ public class Kmeans {
 	}
 	
 	public void setCluster (int ncluster){
+		System.out.println("Log: Number of cluster is set " + ncluster);
 		this.num_cluster =  ncluster;
 		this._centre = new Centre [ncluster];
+		for (int i = 0; i< ncluster; i++) {_centre[i] = new Centre();}
 	}
 	
 	public void setDistanceAlgorithm(String al) {
@@ -95,6 +98,16 @@ public class Kmeans {
 	public void setExperimentType (int type, String test_filename) {
 		this.experimentType = type;
 		this.testfile = test_filename;
+		if (type!=102) {
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				System.err.println("This fucntion is to set the experiment with testing file");
+				System.err.println("Type should be 102");
+				e.printStackTrace();
+			} 
+		}
+		this._without = -1; // no considering to target class in this mode
 		
 	}
 	
@@ -104,11 +117,25 @@ public class Kmeans {
 	 * type = 101 default
 	 * @param targetAttribution
 	 */
-	public void setExperimentType (String targetAttribution) {
+	public void setExperimentType (String targetAttribute) {
 		this.experimentType = 101;
-		this.targetAttribute = targetAttribution;
+		setTargetAttribute(targetAttribute);
 	}
 	
+	/**
+	 * Set the target attribute as the guide for clustering
+	 * @param target
+	 */
+	public void setTargetAttribute (String target) {
+		this.targetAttribute = target;
+//		System.out.println(this.reader.attributeNames);
+		for (int i = 0; i<this.reader.numAttribute; i++) {
+			if (this.reader.attributeNames.get(i).compareTo(target)==0) {
+				this._without = i; 
+				break;
+			}
+		}
+	}
 	/**
 	 * preparing train/test data before running the clustering Kmeans algorithm
 	 */
@@ -163,7 +190,7 @@ public class Kmeans {
 					testSet[i] = reader.data.getInstance(i);
 				}
 			}
-			else { // test on another test set
+			else { // test on another test set type = 102
 				InputReader testrd = new InputReader(this.testfile);
 				testSet = new Instance[testrd.data.numInstance];
 				for (int i = 0; i< testrd.data.numInstance; i++) {
@@ -206,6 +233,16 @@ public class Kmeans {
 	 */
 	private void clearElementList () {
 		for (int i = 0; i<this.num_cluster; i++) {
+			if (this._centre[i] == null ) {
+				try {
+					throw new Exception ();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					System.err.println("Clearing the null centre");
+					e.printStackTrace();
+				}
+				
+			}
 			this._centre[i].clear();
 		}
 	}
@@ -214,7 +251,7 @@ public class Kmeans {
 	 */
 	private void selectRandomSeed() {
 		boolean [] flag = new boolean [trainSet.length];
-		System.out.println("Randomly selection seeds " + trainSet.length);
+//		System.out.println("Randomly selection seeds " + trainSet.length);
 		Random r = new Random(123);
 		for (int i = 0; i< this.num_cluster; i++) {
 			int k = 0;
@@ -230,13 +267,21 @@ public class Kmeans {
 	/**
 	 * Finding the nearest centre for one instance
 	 * @param x
-	 * @return
+	 * @return index of the nearest cluster
 	 */
 	private int nearestCentre(Instance x) {
 		Double mindistance = Constant._MAX;
 		int val = 0;
 		for (int i = 0; i < num_cluster; i++) {
-			Double dt = distance (_centre[i].centeroid, x);
+			Double dt; 
+			// then calculate distance between 2 instances, consider if the _without attribute is set
+			// if _without is set --> clustering regarding to target attribute and vice versa
+			if (this._without == -1) { 
+				dt = distance (_centre[i].centeroid, x);
+			}
+			else {
+				dt = distance (_centre[i].centeroid, x, this._without);
+			}
 			if (dt < mindistance) {
 				mindistance = dt;
 				val = i;
@@ -244,16 +289,17 @@ public class Kmeans {
 		}
 		return val;
 	}
+	
 	/** Clustering
 	 * 
 	 */
 	private void cluster () {
 		selectRandomSeed();
-		System.out.println("Finishing randomly selecting seeds");
+		System.out.println("Log: Finishing randomly selecting seeds");
 		int iterator = 0;
 		boolean hasMovement; // mark the change on loop
 		while (iterator++ <this.maxIterator) {
-			System.out.println(" KMEANS: Cluster() " + iterator);
+//			System.out.println(" KMEANS: Cluster() " + iterator);
 			clearElementList();
 			hasMovement = false;
 			for (int i = 0; i < trainSet.length; i++) {
@@ -263,7 +309,7 @@ public class Kmeans {
 			
 			for (int k = 0; k<num_cluster; k++) {
 				Instance old_centeroid = _centre[k].centeroid.cloneInstance();
-				_centre[k].update();
+				_centre[k].update(this.reader.getAttributeType());
 				if (distance(old_centeroid, _centre[k].centeroid) > 1e-3) {
 					hasMovement = true;
 				}
@@ -271,6 +317,7 @@ public class Kmeans {
 			if (! hasMovement) {break;}
 		}
 		System.out.println("KMEANS: CLUSTER finishes trainig\n");
+		this._iterator = iterator;
 	}
 	
 	/**
@@ -278,26 +325,95 @@ public class Kmeans {
 	 */
 	private void test () {
 		int [] cluster = new int [testSet.length];
+		long [] counts = new long [testSet.length];
 		for (int i = 0; i< testSet.length; i++) {
 			cluster[i] = nearestCentre(testSet[i]);
+			counts[cluster[i]] ++;
 		}
 		
 		String output = "Kmean clustering\n";
+		if (this._without != -1) {
+			output += "Cluster regarding to target class: " + this.targetAttribute + "\n";
+			output += "-->NOTE: This case, number of cluster automatically set by NUMBER Of Class\n";
+		}
 		output += "Numer of Clusters: " + num_cluster + "\n";
 		output += "Distance algorithm: " + this.dfunction + "\n";
 		output += "Max iterator: " + this.maxIterator + "\n";
 		output += "====================\n";
-		output += "Training on " + this.experimentType + " % data : " + trainSet.length + " instances\n";
-		output += "Testing on " + (100-this.experimentType) + " % data :" + testSet.length + " instances\n";
+		output += "Training on " + trainSet.length + " instances\n";
+		output += "Testing on " + testSet.length + " instances\n";
 		output += "====================\n";
 		
-		for (int i = 0; i< testSet.length; i++) {
-			output += testSet[i].originalData.toString() + " --> CLUSTER " + cluster[i] + "\n";
+		output += "RESULT:\n";
+		if (this._without ==-1) {output += "Number of iterator: " + this._iterator + "\n";}
+		output += "Missing values globally replaced with mean method\n";
+		output += "Cluster centroids:\n";
+		output += "\t " + this.reader.attributeNames + "\n";
+		for (int i = 0; i<this.num_cluster; i++) {
+			output += "Cluster " + i + ":\t" + this._centre[i].toInforString(this.reader.getAttributeType()) + "\n";
+			
+		}
+		output += "=========Training===========\n";
+		for (int i =0; i<this.num_cluster; i++) {
+			String tmp = String.format("%2.3f", (double) this._centre[i].elements.numInstance/ trainSet.length * 100);
+			output += "Cluster " + i + ":\t" + this._centre[i].elements.numInstance + "("+ tmp + " %)\n";
+		}
+		output += "=========Testing===========\n";
+		output += "Cluster instances:\n";
+		
+		for (int i =0; i<this.num_cluster; i++) {
+			String tmp = String.format("%2.3f", (double) counts[i]/ testSet.length * 100);
+			output += "Cluster " + i + ":\t" + counts[i]+ "("+ tmp + " %)\n";
 		}
 		
+		if (this._without!=-1 ) {
+			output += "=========Class assigning===========\n";
+			output += "Target Class: " + this.targetAttribute + "\n";
+			for (int i = 0; i < this.num_cluster; i++) {
+				output += _centre[i].name + " ---> " + "Cluster " + i + "\n";
+			}
+			// compute te error rate
+			int wrongcase = 0;
+			for (int i = 0; i<testSet.length; i++) {
+				if (_centre[cluster[i]].name.compareTo(testSet[i].getOriginalAttribute(this._without)) !=0) {
+					wrongcase++;
+				}
+			}
+			output += "Number of wrong clustered instances: " + wrongcase + " ";
+			String tmp = String.format ("%2.3f", (double) wrongcase / testSet.length * 100);
+			output += "(~" + tmp + "%)\n";
+		}
 		this.out = new Output(output);
 		
 	} 
+	/**
+	 * Clustering the data regard to the target class (target attribute)
+	 * Automatically set the  number of clusters equal to number of classes
+	 */
+	private void clusterByTargetClass () {
+		
+		Vector<String> attributeType = this.reader.getAttributeType();
+		
+		String [] targetAttributes = attributeType.get(this._without).split(",");
+		//Automatically chose the number of cluster is number of classes
+//		System.out.println(targetAttributes.length);
+		this.setCluster(targetAttributes.length);
+		
+		this.clearElementList();
+		for (int i = 0; i <this.num_cluster; i++) {
+			_centre[i].setName(targetAttributes[i]);
+			for (int k = 0; k<trainSet.length; k++) {
+				if (trainSet[k].getOriginalAttribute(this._without).compareTo(_centre[i].name) ==0) {
+					//finding all Instances that belongs to this class
+					_centre[i].addElement(trainSet[k]);
+				}
+			}
+			//Update the centroid of this cluster
+			_centre[i].update(this.reader.getAttributeType());
+			
+		}
+		
+	}
 	
 	/** 
 	 * Running Kmeans
@@ -306,7 +422,12 @@ public class Kmeans {
 	 */
 	public void run (){
 		prepareData();
-		cluster();
+		if (this.experimentType !=101) { // dont consider target class in clustering
+			cluster();
+			
+		} else { //consider target class in clustering
+			clusterByTargetClass();
+		}
 		test();
 	}
 	

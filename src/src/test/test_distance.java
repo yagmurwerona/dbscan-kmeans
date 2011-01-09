@@ -39,7 +39,7 @@ public class test_distance {
 		c.addElement(I1);
 		c.addElement(I2);
 		
-		c.update();
+	
 		System.out.println(c.centeroid.data);
 		
 		boolean [] xx = new boolean [2];
