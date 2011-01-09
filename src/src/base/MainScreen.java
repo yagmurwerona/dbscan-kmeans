@@ -1,5 +1,6 @@
 package base;
 
+import gui.AttributeSummaryPanel;
 import gui.ClusterPanel;
 import gui.ViewerDialog;
 
@@ -10,12 +11,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -27,8 +26,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-
-import gui.AttributeSummaryPanel;
 
 @SuppressWarnings("serial")
 public class MainScreen extends JPanel {
@@ -71,8 +68,7 @@ public class MainScreen extends JPanel {
 	    add(menuPanel, BorderLayout.NORTH);
 	    runMenu.add(dbscan);
 	    runMenu.add(kmeans);
-	    m_AttSummaryPanel.setBorder(BorderFactory
-			    .createTitledBorder("Selected Attribute"));
+	    m_AttSummaryPanel.setBorder(BorderFactory.createTitledBorder("Selected Attribute"));
 		JPanel attVis = new JPanel();
 	    attVis.setLayout( new BorderLayout());
 	    attVis.add(m_AttSummaryPanel);
@@ -93,7 +89,11 @@ public class MainScreen extends JPanel {
 	    openFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				openDialog(arg0);
+				try {
+					openDialog(arg0);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	    
@@ -113,8 +113,7 @@ public class MainScreen extends JPanel {
 	}
 	
 	// Handle open button action.
-	@SuppressWarnings("deprecation")
-	public void openDialog(ActionEvent e) {
+	public void openDialog(ActionEvent e) throws FileNotFoundException {
 		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		ArrfFileFilter filter = new ArrfFileFilter();
 		fc.setFileFilter(filter);
@@ -128,30 +127,20 @@ public class MainScreen extends JPanel {
 			numAttributes=0;
 			
 			File file = fc.getSelectedFile();
-			FileInputStream fis = null;
-			BufferedInputStream bis = null;
-			DataInputStream dis = null;
+			Scanner scanner = new Scanner (new FileInputStream(file));
 
 			try {
-				fis = new FileInputStream(file);
-
-				// Here BufferedInputStream is added for fast reading.
-				bis = new BufferedInputStream(fis);
-				dis = new DataInputStream(bis);
-
 				// dis.available() returns 0 if the file does not have more lines.
 				String str = "";
 				boolean isData=false;
-				while (dis.available() != 0) {
+				while (scanner.hasNextLine()) {
+					str = scanner.nextLine();
 					// this statement reads the line from the file and print it to the console
-					str= dis.readLine();
 					if (str.indexOf("RELATION") >0){
-//						System.out.println("Relation=" + str.subSequence(str.indexOf("RELATION") + 9,str.length()));
 						m_AttSummaryPanel.setRelation(str.subSequence(str.indexOf("RELATION") + 9,str.length()).toString().toUpperCase());
 					}
 					if (str.indexOf("ATTRIBUTE") >0){
 						numAttributes ++;
-//						System.out.println("INDEX=" + str.indexOf("ATTRIBUTE"));
 						//For Categorical value
 						if (str.indexOf("{") > 0)
 							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1) + ",";
@@ -164,14 +153,12 @@ public class MainScreen extends JPanel {
 						isData= true;
 				}
 				
-				FileInputStream fis_table = new FileInputStream(file);
-				BufferedInputStream bis_table = new BufferedInputStream(fis_table);
-				DataInputStream dis_table = new DataInputStream(bis_table);
+				Scanner scanner_table = new Scanner (new FileInputStream(file));
 				instances = new String[numInstances];
 				int i =0;
 				isData=false;
-				while (dis_table.available() != 0) {
-					str= dis_table.readLine();
+				while (scanner_table.hasNextLine()) {
+					str= scanner_table.nextLine();
 					if (isData){
 						instances[i] = str;
 						i ++;
@@ -183,15 +170,9 @@ public class MainScreen extends JPanel {
 				m_AttSummaryPanel.setNumInstances(numInstances);
 				m_AttSummaryPanel.setInfo();
 
-				// dispose all the resources after using them.
-				fis.close();
-				bis.close();
-				dis.close();
-
+				clusterPanel.setFile(file.getAbsolutePath());
 			} catch (FileNotFoundException ex) {
 				ex.printStackTrace();
-			} catch (IOException es) {
-				es.printStackTrace();
 			}
 		} else {
 			System.out.println("wrong file");
