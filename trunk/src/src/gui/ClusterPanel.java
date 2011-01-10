@@ -14,9 +14,11 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -110,6 +112,8 @@ public class ClusterPanel extends JPanel {
 
 	protected DefaultListModel m_ignoreKeyModel = new DefaultListModel();
 	protected JList m_ignoreKeyList = new JList(m_ignoreKeyModel);
+	
+	private Vector<String> attribNames;
 
 	// protected Remove m_ignoreFilter = null;
 
@@ -173,7 +177,6 @@ public class ClusterPanel extends JPanel {
 
 		// m_FileChooser.setFileFilter(m_ModelFilter);
 		m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
 		m_ClassCombo.setPreferredSize(COMBO_SIZE);
 		m_ClassCombo.setMaximumSize(COMBO_SIZE);
 		m_ClassCombo.setMinimumSize(COMBO_SIZE);
@@ -226,6 +229,12 @@ public class ClusterPanel extends JPanel {
 				// .getCapabilitiesFilter());
 			}
 		});
+		
+//	    if (inst.classIndex() == -1)
+//	      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+//	    else
+//	      m_ClassCombo.setSelectedIndex(inst.classIndex());
+	    updateRadioLinks();
 
 		// Layout the GUI
 //		JPanel p1 = new JPanel();
@@ -642,5 +651,21 @@ public class ClusterPanel extends JPanel {
 	 */
 	public void setFile(String file) {
 		this.file = file;
+	}
+
+	/**
+	 * @return the attribNames
+	 */
+	public Vector<String> getAttribNames() {
+		return attribNames;
+	}
+
+	/**
+	 * @param attribNames the attribNames to set
+	 */
+	public void setAttribNames(Vector<String> attribNames) {
+		this.attribNames = attribNames;
+		m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
+		repaint();
 	}
 }
