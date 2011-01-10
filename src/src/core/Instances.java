@@ -15,7 +15,7 @@ import java.util.Vector;
  */
 public class Instances {
 	public Vector <Instance> data;
-	
+	private String relation; //Name of data
 	public int numInstance = 0; //number of instances
 	public int numAttribute = 0; // number of attributes of each instance
 	public Vector <String> attributeName = new Vector<String> ();
@@ -100,6 +100,62 @@ public class Instances {
 			outp += i + "\t" + this.getInstance(i).originalData + "\n";
 		}
 		return outp;
+	}
+
+	/**
+	 * @return the numInstance
+	 */
+	public int getNumInstance() {
+		return numInstance;
+	}
+
+	/**
+	 * @param numInstance the numInstance to set
+	 */
+	public void setNumInstance(int numInstance) {
+		this.numInstance = numInstance;
+	}
+
+	/**
+	 * @return the numAttribute
+	 */
+	public int getNumAttribute() {
+		return numAttribute;
+	}
+
+	/**
+	 * @param numAttribute the numAttribute to set
+	 */
+	public void setNumAttribute(int numAttribute) {
+		this.numAttribute = numAttribute;
+	}
+
+	/**
+	 * @return the relation
+	 */
+	public String getRelation() {
+		return relation;
+	}
+
+	/**
+	 * @param relation the relation to set
+	 */
+	public void setRelation(String relation) {
+		this.relation = relation;
+	}
+
+	/**
+	 * @return the attributeName
+	 */
+	public Vector<String> getAttributeName() {
+		return attributeName;
+	}
+
+	/**
+	 * @param attributeName the attributeName to set
+	 */
+	public void setAttributeName(Vector<String> attributeName) {
+		this.attributeName = attributeName;
 	}
 	
 }
