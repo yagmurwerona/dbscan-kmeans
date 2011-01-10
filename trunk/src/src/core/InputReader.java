@@ -243,4 +243,18 @@ public class InputReader {
 	public void setAttributeNames(Vector<String> attributeNames) {
 		this.attributeNames = attributeNames;
 	}
+
+	/**
+	 * @return the flag
+	 */
+	public ArrayList<Integer> getFlag() {
+		return flag;
+	}
+
+	/**
+	 * @param flag the flag to set
+	 */
+	public void setFlag(ArrayList<Integer> flag) {
+		this.flag = flag;
+	}
 }

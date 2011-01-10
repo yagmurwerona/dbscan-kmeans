@@ -144,8 +144,9 @@ public class MainScreen extends JPanel {
 			m_AttSummaryPanel.setNumInstances(inst.getNumAttribute());
 			m_AttSummaryPanel.setInfo();
 			clusterPanel.setFile(file.getAbsolutePath());
-			clusterPanel.setAttributeNames(inst.getAttributeName());
 			clusterPanel.setReader(reader);
+			clusterPanel.setFlag(reader.getFlag());
+			clusterPanel.setAttributeNames(inst.getAttributeName());
 		} else {
 			System.out.println("wrong file");
 		}
