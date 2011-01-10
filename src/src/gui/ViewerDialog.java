@@ -8,6 +8,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -16,6 +17,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import core.Instance;
 
 public class ViewerDialog extends JDialog implements ChangeListener {
 
@@ -108,26 +111,27 @@ public class ViewerDialog extends JDialog implements ChangeListener {
 	/**
 	 * @param tableViewer the tableViewer to set
 	 */
-	public void setTableViewer(String[] instances, String strAttribute, int numAttribute, int numInstances) {
-		//Process Attribute -> Column
-		String[] columnNames = new String[numAttribute];
-		StringTokenizer tokenizer = new StringTokenizer(strAttribute, ",");
-		for (int i = 0; i < numAttribute; i++) {
-			columnNames[i] = tokenizer.nextToken();
-		}
+	public void setTableViewer(Vector <Instance> data, Vector<String> attributeNames, int numAttribute, int numInstances) {
+		//Convert Vector to Array
+		Instance[] dataArray = new Instance[data.size()];
+		data.toArray(dataArray);
+		
+		String[] attributeNamesArray= new String[attributeNames.size()];
+		attributeNames.toArray(attributeNamesArray);
 		
 		//Process Table
 		String tmp="";
+		StringTokenizer tokenizer;
 		Object[][] cells = new Object[numInstances][numAttribute];
 		for (int row = 0; row < numInstances; row++) {
-			tmp = instances[row];
+			tmp = dataArray[row].originalData.toString();
+			tmp = "" + tmp.subSequence(1, tmp.length()-1); //Remove "[" and "]" from Vector
 			tokenizer = new StringTokenizer(tmp, ",");
 			for (int column = 0; column < numAttribute; column++) {
 				cells[row][column] = tokenizer.nextToken();
-//				tmp = "" + tmp.subSequence(tmp.indexOf(',')+1, tmp.length());
 			}
 		}
-		tableViewer = new JTable(cells, columnNames); 
+		tableViewer = new JTable(cells, attributeNamesArray); 
 		tableViewer.setEnabled(false);
 		createDialog();
 	}

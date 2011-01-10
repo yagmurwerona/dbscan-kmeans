@@ -21,7 +21,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -39,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import Kmeans.Kmeans;
+import core.InputReader;
 
 @SuppressWarnings("serial")
 public class ClusterPanel extends JPanel {
@@ -113,7 +113,8 @@ public class ClusterPanel extends JPanel {
 	protected DefaultListModel m_ignoreKeyModel = new DefaultListModel();
 	protected JList m_ignoreKeyList = new JList(m_ignoreKeyModel);
 	
-	private Vector<String> attribNames;
+	private Vector<String> attributeNames;
+	private InputReader reader;
 
 	// protected Remove m_ignoreFilter = null;
 
@@ -579,10 +580,10 @@ public class ClusterPanel extends JPanel {
 						m_StartBut.setEnabled(true);
 						m_StopBut.setEnabled(false);
 					}
-					
 					Kmeans km = new Kmeans();
-					km.setInput(file);
-					km.setDistanceAlgorithm("Mahattan");
+//					km.setInput(file); -> to avoid read a file twice.
+					km.setReader(reader);
+					km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
 					km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
 					km.setExperimentType("class");
 					km.run();
@@ -597,6 +598,7 @@ public class ClusterPanel extends JPanel {
 	/**
 	 * Stops the currently running clusterer (if any).
 	 */
+	@SuppressWarnings("deprecation")
 	protected void stopClusterer() {
 
 		if (m_RunThread != null) {
@@ -656,16 +658,30 @@ public class ClusterPanel extends JPanel {
 	/**
 	 * @return the attribNames
 	 */
-	public Vector<String> getAttribNames() {
-		return attribNames;
+	public Vector<String> getAttributeNames() {
+		return attributeNames;
 	}
 
 	/**
-	 * @param attribNames the attribNames to set
+	 * @param attributeNames the attribNames to set
 	 */
-	public void setAttribNames(Vector<String> attribNames) {
-		this.attribNames = attribNames;
-		m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
+	public void setAttributeNames(Vector<String> attributeNames) {
+		this.attributeNames = attributeNames;
+		m_ClassCombo.setModel(new DefaultComboBoxModel(attributeNames));
 		repaint();
+	}
+
+	/**
+	 * @return the reader
+	 */
+	public InputReader getReader() {
+		return reader;
+	}
+
+	/**
+	 * @param reader the reader to set
+	 */
+	public void setReader(InputReader reader) {
+		this.reader = reader;
 	}
 }
