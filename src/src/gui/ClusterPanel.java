@@ -208,7 +208,6 @@ public class ClusterPanel extends JPanel {
 		
 		m_NoiseRemovalBut.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_NumClustersText.setEnabled(false);
 				m_ThresholdText.setEnabled(true);
 			}
 		});
@@ -546,11 +545,14 @@ public class ClusterPanel extends JPanel {
 		if (m_RunThread == null && file != null) {
 			m_StartBut.setEnabled(false);
 			m_StopBut.setEnabled(true);
+			
 			m_RunThread = new Thread() {
 				public void run() {
+					int testMode;
+					int percent = 66;
 					try {
-						int testMode = 0;
-						int percent = 66;
+						testMode = 0;
+						
 						if (m_PercentBut.isSelected()) {
 							testMode = 2;
 							percent = Integer.parseInt(m_PercentText.getText());
@@ -566,6 +568,8 @@ public class ClusterPanel extends JPanel {
 							// Code...
 						} else if (m_ClassesToClustersBut.isSelected()) {
 							testMode = 5;
+						} else if  (m_NoiseRemovalBut.isSelected()){
+							testMode = 6;
 						} else {
 							try {
 								throw new Exception("Unknown test mode");
@@ -573,6 +577,32 @@ public class ClusterPanel extends JPanel {
 								e.printStackTrace();
 							}
 						}
+						Kmeans km = new Kmeans();
+//						km.setInput(file); -> to avoid read a file twice.
+						km.setReader(reader);
+						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						System.out.println(testMode);
+						if (testMode == 6) {// noise removal
+							km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
+						} else if (testMode ==2) { // train on percent %, test on the rest
+							km.setExperimentType(percent);
+							km.run();
+						} else if (testMode ==3) {//train on full data and test on full data
+							km.setExperimentType(0);
+							km.run();
+						} else if (testMode ==4) {//train on full data, test on supplied data
+//							km.setExperimentType(102, test_filename);
+							km.run();
+						} else if (testMode ==5) {// cluster according to the target attribute
+//							km.setTargetAttribute(target)
+							km.setExperimentType("class");
+							km.run();
+						}
+						
+						
+						
+						m_OutText.setText(km.getOutput().getContent());
 					} catch (Exception ex) {
 						ex.printStackTrace();
 						JOptionPane.showMessageDialog(ClusterPanel.this,
@@ -584,14 +614,6 @@ public class ClusterPanel extends JPanel {
 						m_StartBut.setEnabled(true);
 						m_StopBut.setEnabled(false);
 					}
-					Kmeans km = new Kmeans();
-//					km.setInput(file); -> to avoid read a file twice.
-					km.setReader(reader);
-					km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-					km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-					km.setExperimentType("class");
-					km.run();
-					m_OutText.setText(km.getOutput().getContent());
 				}
 			};
 			m_RunThread.setPriority(Thread.MIN_PRIORITY);
