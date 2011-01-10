@@ -184,7 +184,7 @@ public class Kmeans {
 			}
 			
 			// and testing varies dependings on experiment type
-			if (this.experimentType ==0 || this.experimentType == 101) {//test all data
+			if (this.experimentType ==0 || this.experimentType == 101) {//test all data, =101: test with target class
 				testSet = new Instance[total];
 				for (int i = 0; i< total; i++) {
 					testSet[i] = reader.data.getInstance(i);
@@ -476,7 +476,8 @@ public class Kmeans {
 			String tmp = String.format("%2.3f", (double) this._centre[i].elements.numInstance/ trainSet.length * 100);
 			output += "Cluster " + i + ":\t" + this._centre[i].elements.numInstance + "("+ tmp + " %)\n";
 		}
-		output += "Noise Clusters (instances belong to those clusters will be considered noise\n";
+		output += "Noise Clusters (instances belong to those clusters will be considered noise)\n";
+		int countnoise = 0;
 		for (int i = 0; i< this.num_cluster; i++) {
 			
 			if (_centre[i].elements.numInstance < false_threshold * trainSet.length / 100) {
@@ -484,8 +485,10 @@ public class Kmeans {
 				output += "Cluster number " + i + ": " + _centre[i].toInforString(this.reader.getAttributeType()) + "\n";
 				output += "Instances: \n";
 				output += _centre[i].elements.getInfor() + "\n";
+				countnoise += _centre[i].elements.numInstance;
 			}
 		}
+		output += countnoise + " instances are noise\n";
 		this.out = new Output (output);
 		
 	}
@@ -508,4 +511,13 @@ public class Kmeans {
 	public void setReader(InputReader reader) {
 		this.reader = reader;
 	}
+	
+	public int getNumCluster () {
+		return this.num_cluster;
+	}
+	
+	public String getAlg () {
+		return this.dfunction;
+	}
+
 }
