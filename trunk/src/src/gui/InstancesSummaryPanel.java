@@ -59,6 +59,10 @@ public class InstancesSummaryPanel
   /** Displays the sum of instance weights */
   protected JLabel m_sumOfWeightsLab = new JLabel(NO_SOURCE);
   
+	private int numAttributes;
+	private int numInstances;
+	private String relation;
+  
   /** 
    * Whether to display 0 or ? for the number of instances
    * in cases where a dataset has only structure. Depending
@@ -156,25 +160,12 @@ public class InstancesSummaryPanel
   public boolean getShowZeroInstancesAsUnknown() {
     return m_showZeroInstancesAsUnknown;
   }
-
-  /**
-   * Tells the panel to use a new set of instances.
-   *
-   * @param inst a set of Instances
-   */
-//  public void setInstances(Instances inst) {
-//    m_Instances = inst;
-//    m_RelationNameLab.setText(m_Instances.relationName());
-//    m_NumInstancesLab.setText("" + 
-//        ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) 
-//            ? "?" 
-//            : "" + m_Instances.numInstances()));
-//    m_NumAttributesLab.setText("" + m_Instances.numAttributes());
-//    m_sumOfWeightsLab.setText("" + 
-//        ((m_showZeroInstancesAsUnknown && m_Instances.numInstances() == 0) 
-//            ? "?" 
-//            : "" + Utils.doubleToString(m_Instances.sumOfWeights(), 3)));
-//  }
+  
+  public void updateValues(){
+	  m_NumAttributesLab.setText("" + getNumAttributes());
+	  m_NumInstancesLab.setText("" + getNumInstances());
+	  m_RelationNameLab.setText("" + getRelation());
+  }
 
   /**
    * Tests out the instance summary panel from the command line.
@@ -208,5 +199,47 @@ public class InstancesSummaryPanel
       System.err.println(ex.getMessage());
     }
   }
+
+/**
+ * @return the numAttributes
+ */
+public int getNumAttributes() {
+	return numAttributes;
+}
+
+/**
+ * @param numAttributes the numAttributes to set
+ */
+public void setNumAttributes(int numAttributes) {
+	this.numAttributes = numAttributes;
+}
+
+/**
+ * @return the numInstances
+ */
+public int getNumInstances() {
+	return numInstances;
+}
+
+/**
+ * @param numInstances the numInstances to set
+ */
+public void setNumInstances(int numInstances) {
+	this.numInstances = numInstances;
+}
+
+/**
+ * @return the relation
+ */
+public String getRelation() {
+	return relation;
+}
+
+/**
+ * @param relation the relation to set
+ */
+public void setRelation(String relation) {
+	this.relation = relation;
+}
   
 }
