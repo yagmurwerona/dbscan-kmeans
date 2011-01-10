@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -24,22 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import base.ArrfFileFilter;
-/** 
- * A panel that displays an instance summary for a set of instances and
- * lets the user open a set of instances from either a file or URL.
- *
- * Instances may be obtained either in a batch or incremental fashion.
- * If incremental reading is used, then
- * the client should obtain the Loader object (by calling
- * getLoader()) and read the instances one at a time. If
- * batch loading is used, then SetInstancesPanel will load
- * the data into memory inside of a separate thread and notify
- * the client when the operation is complete. The client can
- * then retrieve the instances by calling getInstances().
- *
- * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 6890 $
- */
 public class SetInstancesPanel
   extends JPanel {
 
@@ -77,18 +62,6 @@ public class SetInstancesPanel
   /** The thread we do loading in. */
   protected Thread m_IOThread;
 
-  /**
-   * Manages sending notifications to people when we change the set of
-   * working instances.
-   */
-  protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
-
-  /** The current set of instances loaded. */
-//  protected Instances m_Instances;
-
-  /** The current loader used to obtain the current instances. */
-//  protected weka.core.converters.Loader m_Loader;
-  
   /** the parent frame. if one is provided, the close-button is displayed */
   protected JFrame m_ParentFrame = null;
 
@@ -129,11 +102,6 @@ public class SetInstancesPanel
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_CloseBut.setToolTipText("Closes the dialog");
-//    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    m_OpenURLBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-      }
-    });
     m_OpenFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setInstancesFromFileQ();
@@ -146,17 +114,6 @@ public class SetInstancesPanel
     });
     m_Summary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-//    m_ClassComboBox.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//	if ((m_Instances != null) && (m_ClassComboBox.getSelectedIndex() != -1)) {
-//	  if (m_Instances.numAttributes() >= m_ClassComboBox.getSelectedIndex()) {
-//	    m_Instances.setClassIndex(m_ClassComboBox.getSelectedIndex() - 1);   // -1 because of NO_CLASS element
-//	    m_Support.firePropertyChange("", null, null);
-//	  }
-//	}
-//      }
-//    });
-    
     JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
     panelButtons.add(m_OpenFileBut);
     panelButtons.add(m_OpenURLBut);
@@ -235,30 +192,20 @@ public class SetInstancesPanel
 		if ((returnVal == JFileChooser.APPROVE_OPTION)
 				&& (fc.getSelectedFile().isFile())) {
 			File file = fc.getSelectedFile();
-			FileInputStream fis = null;
-			BufferedInputStream bis = null;
-			DataInputStream dis = null;
 
 			try {
-				fis = new FileInputStream(file);
+				Scanner scanner = new Scanner (new FileInputStream(file));
 
-				// Here BufferedInputStream is added for fast reading.
-				bis = new BufferedInputStream(fis);
-				dis = new DataInputStream(bis);
-
-				// dis.available() returns 0 if the file does not have more lines.
 				String str = "";
 				boolean isData=false;
-				while (dis.available() != 0) {
+				while (scanner.hasNextLine()) {
 					// this statement reads the line from the file and print it to the console
-					str= dis.readLine();
+					str= scanner.nextLine();
 					if (str.indexOf("RELATION") >0){
-//						System.out.println("Relation=" + str.subSequence(str.indexOf("RELATION") + 9,str.length()));
-//						m_AttSummaryPanel.setRelation(str.subSequence(str.indexOf("RELATION") + 9,str.length()).toString().toUpperCase());
+						m_Summary.setRelation(str.subSequence(str.indexOf("RELATION") + 9,str.length()).toString().toUpperCase());
 					}
 					if (str.indexOf("ATTRIBUTE") >0){
 						numAttributes ++;
-//						System.out.println("INDEX=" + str.indexOf("ATTRIBUTE"));
 						//For Categorical value
 						if (str.indexOf("{") > 0)
 							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1) + ",";
@@ -270,15 +217,17 @@ public class SetInstancesPanel
 					if (str.indexOf("DATA") >0)
 						isData= true;
 				}
+				m_Summary.setNumAttributes(numAttributes);
+				m_Summary.setNumInstances(numInstances);
+				m_Summary.updateValues();
+				scanner.close();
 				
-				FileInputStream fis_table = new FileInputStream(file);
-				BufferedInputStream bis_table = new BufferedInputStream(fis_table);
-				DataInputStream dis_table = new DataInputStream(bis_table);
+				Scanner scanner_tbl = new Scanner (new FileInputStream(file));
 				instances = new String[numInstances];
 				int i =0;
 				isData=false;
-				while (dis_table.available() != 0) {
-					str= dis_table.readLine();
+				while (scanner_tbl.hasNextLine()) {
+					str= scanner_tbl.nextLine();
 					if (isData){
 						instances[i] = str;
 						i ++;
@@ -286,15 +235,7 @@ public class SetInstancesPanel
 					if (str.indexOf("DATA") >0)
 						isData= true;
 				}
-//				m_AttSummaryPanel.setNumAttributes(numAttributes);
-//				m_AttSummaryPanel.setNumInstances(numInstances);
-//				m_AttSummaryPanel.setInfo();
-
-				// dispose all the resources after using them.
-				fis.close();
-				bis.close();
-				dis.close();
-
+				scanner_tbl.close();
 			} catch (FileNotFoundException ex) {
 				ex.printStackTrace();
 			} catch (IOException es) {
@@ -439,23 +380,5 @@ public class SetInstancesPanel
    */
   public boolean getReadIncrementally() {
     return m_readIncrementally;
-  }
-  
-  /**
-   * Adds a PropertyChangeListener who will be notified of value changes.
-   *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void addPropertyChangeListener(PropertyChangeListener l) {
-    m_Support.addPropertyChangeListener(l);
-  }
-
-  /**
-   * Removes a PropertyChangeListener.
-   *
-   * @param l a value of type 'PropertyChangeListener'
-   */
-  public void removePropertyChangeListener(PropertyChangeListener l) {
-    m_Support.removePropertyChangeListener(l);
   }
 }
