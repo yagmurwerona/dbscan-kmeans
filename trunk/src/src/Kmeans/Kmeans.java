@@ -496,4 +496,16 @@ public class Kmeans {
 	public Output getOutput () {
 		return this.out;
 	}
+	/**
+	 * @return the reader
+	 */
+	public InputReader getReader() {
+		return reader;
+	}
+	/**
+	 * @param reader the reader to set
+	 */
+	public void setReader(InputReader reader) {
+		this.reader = reader;
+	}
 }
