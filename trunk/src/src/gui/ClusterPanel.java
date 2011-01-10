@@ -41,25 +41,34 @@ import Kmeans.Kmeans;
 @SuppressWarnings("serial")
 public class ClusterPanel extends JPanel {
 	
+	
 	protected JLabel m_MaxIterationsLab = new JLabel("maxIterations");
-	
-	protected JLabel m_MinStdDevLab = new JLabel("minStdDev");
-	
-	protected JLabel m_NumClustersLab = new JLabel("numClusters");
-	
-	protected JLabel m_ThresholdLab = new JLabel("Threshold");
 	
 	protected JTextField m_MaxIterationsText = new JTextField("100");
 	
-	protected JTextField m_MinStdDevText = new JTextField("1.0E-6");
+	protected JLabel m_NumClustersLab = new JLabel("numClusters");
 	
 	protected JTextField m_NumClustersText = new JTextField("2");
+	
+	protected JLabel m_ThresholdLab = new JLabel("Threshold");
 	
 	protected JTextField m_ThresholdText = new JTextField("100");
 	
 	protected JLabel m_DistanceFunctionLab = new JLabel("DistanceFunction");
 	
-	protected JComboBox m_DistanceFunctionCombo = new JComboBox(new String[] {"EuclideanDistance", "Mahattan" });
+	protected JComboBox m_DistanceFunctionCombo = new JComboBox(new String[] {"Euclidean", "Mahattan" });
+	
+	protected JLabel m_MinPointsLab = new JLabel("Min Points");
+	
+	protected JTextField m_MinPointsText = new JTextField("6");
+	
+	protected JLabel m_EpsLab = new JLabel("Eps");
+	
+	protected JTextField m_EpsText = new JTextField("0.9");
+	
+	protected JLabel m_ExperimentTypeLab = new JLabel("Experiment Type");
+	
+	protected JTextField m_ExperimentTypeText = new JTextField("66");
 	
 	/** The output area for classification results */
 	protected JTextArea m_OutText = new JTextArea(20, 40);
@@ -128,7 +137,7 @@ public class ClusterPanel extends JPanel {
 	 * Check to save the predictions in the results list for visualizing later
 	 * on
 	 */
-	protected JCheckBox m_StorePredictionsBut = new JCheckBox("Store clusters for visualization");
+	protected JRadioButton m_NoiseRemovalBut = new JRadioButton("Noise Removal");
 
 	/** A thread that clustering runs in */
 	protected Thread m_RunThread;
@@ -152,22 +161,14 @@ public class ClusterPanel extends JPanel {
 			}
 		});
 
-		m_TrainBut.setToolTipText("Cluster the same set that the clusterer"
-				+ " is trained on");
-		m_PercentBut.setToolTipText("Train on a percentage of the data and"
-				+ " cluster the remainder");
+		m_TrainBut.setToolTipText("Cluster the same set that the clusterer"+ " is trained on");
+		m_PercentBut.setToolTipText("Train on a percentage of the data and"+ " cluster the remainder");
 		m_TestSplitBut.setToolTipText("Cluster a user-specified dataset");
-		m_ClassesToClustersBut
-				.setToolTipText("Evaluate clusters with respect to a"
-						+ " class");
-		m_ClassCombo
-				.setToolTipText("Select the class attribute for class based"
-						+ " evaluation");
+		m_ClassesToClustersBut.setToolTipText("Evaluate clusters with respect to a" + " class");
+		m_ClassCombo.setToolTipText("Select the class attribute for class based" + " evaluation");
 		m_StartBut.setToolTipText("Starts the clustering");
 		m_StopBut.setToolTipText("Stops a running clusterer");
-		m_StorePredictionsBut
-				.setToolTipText("Store predictions in the result list for later "
-						+ "visualization");
+		m_NoiseRemovalBut.setToolTipText("Noise removal" + "");
 		// m_ignoreBut.setToolTipText("Ignore attributes during clustering");
 
 		// m_FileChooser.setFileFilter(m_ModelFilter);
@@ -185,6 +186,7 @@ public class ClusterPanel extends JPanel {
 		bg.add(m_PercentBut);
 		bg.add(m_TestSplitBut);
 		bg.add(m_ClassesToClustersBut);
+		bg.add(m_NoiseRemovalBut);
 		
 		m_TrainBut.addActionListener(m_RadioListener);
 		m_PercentBut.addActionListener(m_RadioListener);
@@ -193,6 +195,13 @@ public class ClusterPanel extends JPanel {
 		m_SetTestBut.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setTestSet();
+			}
+		});
+		
+		m_NoiseRemovalBut.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				m_NumClustersText.setEnabled(false);
+				m_ThresholdText.setEnabled(true);
 			}
 		});
 		
@@ -219,11 +228,10 @@ public class ClusterPanel extends JPanel {
 		});
 
 		// Layout the GUI
-		JPanel p1 = new JPanel();
-		p1.setBorder(BorderFactory.createCompoundBorder(
-				BorderFactory.createTitledBorder("Clusterer"),
-				BorderFactory.createEmptyBorder(0, 5, 5, 5)));
-		p1.setLayout(new BorderLayout());
+//		JPanel p1 = new JPanel();
+//		p1.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Clusterer"),
+//				BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+//		p1.setLayout(new BorderLayout());
 		// p1.add(m_CLPanel, BorderLayout.NORTH);
 
 		JPanel p2 = new JPanel();
@@ -304,76 +312,12 @@ public class ClusterPanel extends JPanel {
 		gbC.gridy = 5;
 		gbC.gridx = 0;
 		gbC.gridwidth = 2;
-		gbL.setConstraints(m_StorePredictionsBut, gbC);
-		p2.add(m_StorePredictionsBut);
+		gbL.setConstraints(m_NoiseRemovalBut, gbC);
+		p2.add(m_NoiseRemovalBut);
 		
 		gbC = new GridBagConstraints();
 		gbC.anchor = GridBagConstraints.WEST;
 		gbC.gridy = 6;
-		gbC.gridx = 0;
-		gbL.setConstraints(m_MinStdDevLab, gbC);
-		p2.add(m_MinStdDevLab);
-
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.EAST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 6;
-		gbC.gridx = 1;
-		gbC.insets = new Insets(2, 10, 2, 10);
-		gbL.setConstraints(m_MinStdDevText, gbC);
-		p2.add(m_MinStdDevText);
-		
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.WEST;
-		gbC.gridy = 7;
-		gbC.gridx = 0;
-		gbL.setConstraints(m_MaxIterationsLab, gbC);
-		p2.add(m_MaxIterationsLab);
-
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.EAST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 7;
-		gbC.gridx = 1;
-		gbC.insets = new Insets(2, 10, 2, 10);
-		gbL.setConstraints(m_MaxIterationsText, gbC);
-		p2.add(m_MaxIterationsText);
-		
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.WEST;
-		gbC.gridy = 8;
-		gbC.gridx = 0;
-		gbL.setConstraints(m_NumClustersLab, gbC);
-		p2.add(m_NumClustersLab);
-
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.EAST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 8;
-		gbC.gridx = 1;
-		gbC.insets = new Insets(2, 10, 2, 10);
-		gbL.setConstraints(m_NumClustersText, gbC);
-		p2.add(m_NumClustersText);
-
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.WEST;
-		gbC.gridy = 9;
-		gbC.gridx = 0;
-		gbL.setConstraints(m_ThresholdLab, gbC);
-		p2.add(m_ThresholdLab);
-
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.EAST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 9;
-		gbC.gridx = 1;
-		gbC.insets = new Insets(2, 10, 2, 10);
-		gbL.setConstraints(m_ThresholdText, gbC);
-		p2.add(m_ThresholdText);		
-		
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.WEST;
-		gbC.gridy = 10;
 		gbC.gridx = 0;
 		gbL.setConstraints(m_DistanceFunctionLab, gbC);
 		p2.add(m_DistanceFunctionLab);
@@ -381,11 +325,110 @@ public class ClusterPanel extends JPanel {
 		gbC = new GridBagConstraints();
 		gbC.anchor = GridBagConstraints.EAST;
 		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 10;
+		gbC.gridy = 6;
 		gbC.gridx = 1;
 		gbC.insets = new Insets(2, 10, 2, 10);
 		gbL.setConstraints(m_DistanceFunctionCombo, gbC);
 		p2.add(m_DistanceFunctionCombo);
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 7;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_ExperimentTypeLab, gbC);
+		p2.add(m_ExperimentTypeLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 7;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_ExperimentTypeText, gbC);
+		p2.add(m_ExperimentTypeText);
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 8;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_MaxIterationsLab, gbC);
+		p2.add(m_MaxIterationsLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 8;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_MaxIterationsText, gbC);
+		p2.add(m_MaxIterationsText);
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 9;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_NumClustersLab, gbC);
+		p2.add(m_NumClustersLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 9;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_NumClustersText, gbC);
+		p2.add(m_NumClustersText);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 10;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_ThresholdLab, gbC);
+		p2.add(m_ThresholdLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 10;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_ThresholdText, gbC);
+		p2.add(m_ThresholdText);		
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 11;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_MinPointsLab, gbC);
+		p2.add(m_MinPointsLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 11;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_MinPointsText, gbC);
+		p2.add(m_MinPointsText);
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 12;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_EpsLab, gbC);
+		p2.add(m_EpsLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 12;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_EpsText, gbC);
+		p2.add(m_EpsText);
+		
+		//DBScan option is chosen first 
+		updateOption(false);
 
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(2, 1));
@@ -458,7 +501,7 @@ public class ClusterPanel extends JPanel {
 		mondo.add(p3);
 
 		setLayout(new BorderLayout());
-		add(p1, BorderLayout.NORTH);
+//		add(p1, BorderLayout.NORTH);
 		add(mondo, BorderLayout.CENTER);
 	}
 
@@ -568,14 +611,22 @@ public class ClusterPanel extends JPanel {
 		m_PercentText.setEnabled(m_PercentBut.isSelected());
 		m_PercentLab.setEnabled(m_PercentBut.isSelected());
 		m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
+		if (!m_NoiseRemovalBut.isSelected() && m_MaxIterationsText.isEnabled()){
+			m_NumClustersText.setEnabled(true);
+			m_ThresholdText.setEnabled(false);
+		}
 	}
 	
 	public void updateOption(boolean choice) {
-		m_MinStdDevText.setEnabled(!choice);
+		m_MinPointsText.setEnabled(!choice);
+		m_EpsText.setEnabled(!choice);
 		m_MaxIterationsText.setEnabled(choice);
 		m_NumClustersText.setEnabled(choice);
-		m_ThresholdText.setEnabled(choice);
-		m_DistanceFunctionCombo.setEnabled(choice);
+		m_ThresholdText.setEnabled(false);
+		m_NoiseRemovalBut.setEnabled(choice);
+		if (m_NoiseRemovalBut.isSelected()){
+			m_PercentBut.setSelected(true);
+		}
 	}
 
 	/**
