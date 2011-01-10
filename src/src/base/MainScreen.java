@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -37,6 +39,7 @@ public class MainScreen extends JPanel {
 	static JFrame jf = new JFrame("Preprocess");
 	String[] instances;
 	String strAttribute="";
+	Vector <String> attributeNames;
 	int numInstances = 0;
 	int numAttributes=0;
 
@@ -141,7 +144,7 @@ public class MainScreen extends JPanel {
 			strAttribute="";
 			numInstances = 0;
 			numAttributes=0;
-			
+			attributeNames = new Vector<String>();			
 			File file = fc.getSelectedFile();
 			Scanner scanner = new Scanner (new FileInputStream(file));
 
@@ -158,16 +161,20 @@ public class MainScreen extends JPanel {
 					if (str.indexOf("ATTRIBUTE") >0){
 						numAttributes ++;
 						//For Categorical value
-						if (str.indexOf("{") > 0)
+						if (str.indexOf("{") > 0){
 							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1) + ",";
-						else //For NUMERIC value
+							attributeNames.add("(Nom)" + str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1));
+						}else{ //For NUMERIC value
 							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("NUMERIC") -1) + ",";
+							attributeNames.add("(Num)" + str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("NUMERIC") -1));
+						}
 					}
 					if (isData)
 						numInstances ++;
 					if (str.indexOf("DATA") >0)
 						isData= true;
 				}
+				scanner.close();
 				
 				Scanner scanner_table = new Scanner (new FileInputStream(file));
 				instances = new String[numInstances];
@@ -182,11 +189,14 @@ public class MainScreen extends JPanel {
 					if (str.indexOf("DATA") >0)
 						isData= true;
 				}
+				scanner_table.close();
+				
 				m_AttSummaryPanel.setNumAttributes(numAttributes);
 				m_AttSummaryPanel.setNumInstances(numInstances);
 				m_AttSummaryPanel.setInfo();
 
 				clusterPanel.setFile(file.getAbsolutePath());
+				clusterPanel.setAttribNames(attributeNames);
 			} catch (FileNotFoundException ex) {
 				ex.printStackTrace();
 			}
