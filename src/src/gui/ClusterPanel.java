@@ -14,6 +14,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -39,6 +41,7 @@ import javax.swing.event.ChangeListener;
 
 import Kmeans.Kmeans;
 import core.InputReader;
+import core.Instance;
 
 @SuppressWarnings("serial")
 public class ClusterPanel extends JPanel {
@@ -115,6 +118,7 @@ public class ClusterPanel extends JPanel {
 	
 	private Vector<String> attributeNames;
 	private InputReader reader;
+	private ArrayList<Integer> flag;
 
 	// protected Remove m_ignoreFilter = null;
 
@@ -614,7 +618,6 @@ public class ClusterPanel extends JPanel {
 	 * Updates the enabled status of the input fields and labels.
 	 */
 	protected void updateRadioLinks() {
-
 		m_SetTestBut.setEnabled(m_TestSplitBut.isSelected());
 		if ((m_SetTestFrame != null) && (!m_TestSplitBut.isSelected())) {
 			m_SetTestFrame.setVisible(false);
@@ -667,7 +670,19 @@ public class ClusterPanel extends JPanel {
 	 */
 	public void setAttributeNames(Vector<String> attributeNames) {
 		this.attributeNames = attributeNames;
-		m_ClassCombo.setModel(new DefaultComboBoxModel(attributeNames));
+		String[] attributeNamesArray = new String[attributeNames.size()];
+		attributeNames.toArray(attributeNamesArray);
+		ListIterator<Integer> litr = getFlag().listIterator();
+		int index=0;
+	    while (litr.hasNext()) {
+	      Integer element = litr.next();
+	      if (element == 0)
+	    	  attributeNamesArray[index] = "(Nom) " + attributeNamesArray[index].toString();
+	      else
+	    	  attributeNamesArray[index] = "(Num) " + attributeNamesArray[index].toString();
+	      index ++;
+	    }
+		m_ClassCombo.setModel(new DefaultComboBoxModel(attributeNamesArray));
 		repaint();
 	}
 
@@ -683,5 +698,19 @@ public class ClusterPanel extends JPanel {
 	 */
 	public void setReader(InputReader reader) {
 		this.reader = reader;
+	}
+
+	/**
+	 * @return the flag
+	 */
+	public ArrayList<Integer> getFlag() {
+		return flag;
+	}
+
+	/**
+	 * @param flag the flag to set
+	 */
+	public void setFlag(ArrayList<Integer> flag) {
+		this.flag = flag;
 	}
 }
