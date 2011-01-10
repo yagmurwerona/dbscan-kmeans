@@ -21,6 +21,7 @@ import java.util.Vector;
 public class InputReader {
 	public Instances data = new Instances();
 	private String filename;
+	private String relation="";
 	public int numAttribute = 0;
 	public int numInstances = 0;
 	public Vector<String> attributeNames = new Vector<String> ();
@@ -59,6 +60,9 @@ public class InputReader {
 				if (line.compareTo("") != 0) {
 					String[] splitLine = line.split("\\s+");
 					if (splitLine[0].compareTo(C._DATA) ==0) {break;}
+					if (splitLine[0].compareTo(C._RELATION) == 0) {
+						relation = splitLine[1].toUpperCase();
+					}
 					if (splitLine[0].compareTo(C._ATTRIBUTE) == 0) {
 						if (splitLine.length != 3) {
 							System.err.println("Wrong format in ATTRIBUTE");
@@ -176,7 +180,7 @@ public class InputReader {
 		this.contentRead (filename);
 		this.data = missingHandle();
 		this.data.setAttributeNames(this.attributeNames);
-		
+		this.data.setRelation(relation);
 	}
 	/**
 	 * Handle missing value by everage assigning method
@@ -224,5 +228,19 @@ public class InputReader {
 	
 	public Vector<String> getAttributeType () {
 		return this._attributeValues;
+	}
+
+	/**
+	 * @return the attributeNames
+	 */
+	public Vector<String> getAttributeNames() {
+		return attributeNames;
+	}
+
+	/**
+	 * @param attributeNames the attributeNames to set
+	 */
+	public void setAttributeNames(Vector<String> attributeNames) {
+		this.attributeNames = attributeNames;
 	}
 }
