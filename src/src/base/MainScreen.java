@@ -12,11 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -29,6 +25,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
+import core.InputReader;
+import core.Instances;
+
 @SuppressWarnings("serial")
 public class MainScreen extends JPanel {
 
@@ -39,9 +38,7 @@ public class MainScreen extends JPanel {
 	static JFrame jf = new JFrame("Preprocess");
 	String[] instances;
 	String strAttribute="";
-	Vector <String> attributeNames;
-	int numInstances = 0;
-	int numAttributes=0;
+	Instances inst;
 
 	public MainScreen() {
 		// Set up the GUI layout
@@ -139,67 +136,16 @@ public class MainScreen extends JPanel {
 		int returnVal = fc.showOpenDialog(this);
 		if ((returnVal == JFileChooser.APPROVE_OPTION)
 				&& (fc.getSelectedFile().isFile())) {
-			//Reset
-			instances =null;
-			strAttribute="";
-			numInstances = 0;
-			numAttributes=0;
-			attributeNames = new Vector<String>();			
 			File file = fc.getSelectedFile();
-			Scanner scanner = new Scanner (new FileInputStream(file));
-
-			try {
-				// dis.available() returns 0 if the file does not have more lines.
-				String str = "";
-				boolean isData=false;
-				while (scanner.hasNextLine()) {
-					str = scanner.nextLine();
-					// this statement reads the line from the file and print it to the console
-					if (str.indexOf("RELATION") >0){
-						m_AttSummaryPanel.setRelation(str.subSequence(str.indexOf("RELATION") + 9,str.length()).toString().toUpperCase());
-					}
-					if (str.indexOf("ATTRIBUTE") >0){
-						numAttributes ++;
-						//For Categorical value
-						if (str.indexOf("{") > 0){
-							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1) + ",";
-							attributeNames.add("(Nom)" + str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1));
-						}else{ //For NUMERIC value
-							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("NUMERIC") -1) + ",";
-							attributeNames.add("(Num)" + str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("NUMERIC") -1));
-						}
-					}
-					if (isData)
-						numInstances ++;
-					if (str.indexOf("DATA") >0)
-						isData= true;
-				}
-				scanner.close();
-				
-				Scanner scanner_table = new Scanner (new FileInputStream(file));
-				instances = new String[numInstances];
-				int i =0;
-				isData=false;
-				while (scanner_table.hasNextLine()) {
-					str= scanner_table.nextLine();
-					if (isData){
-						instances[i] = str;
-						i ++;
-					}
-					if (str.indexOf("DATA") >0)
-						isData= true;
-				}
-				scanner_table.close();
-				
-				m_AttSummaryPanel.setNumAttributes(numAttributes);
-				m_AttSummaryPanel.setNumInstances(numInstances);
-				m_AttSummaryPanel.setInfo();
-
-				clusterPanel.setFile(file.getAbsolutePath());
-				clusterPanel.setAttribNames(attributeNames);
-			} catch (FileNotFoundException ex) {
-				ex.printStackTrace();
-			}
+			InputReader reader = new InputReader(file.getAbsolutePath());
+			Instances inst = reader.getData();
+			m_AttSummaryPanel.setRelation(inst.getRelation());
+			m_AttSummaryPanel.setNumAttributes(inst.getNumInstance());
+			m_AttSummaryPanel.setNumInstances(inst.getNumAttribute());
+			m_AttSummaryPanel.setInfo();
+			clusterPanel.setFile(file.getAbsolutePath());
+			clusterPanel.setAttributeNames(inst.getAttributeName());
+			clusterPanel.setReader(reader);
 		} else {
 			System.out.println("wrong file");
 		}
@@ -210,9 +156,9 @@ public class MainScreen extends JPanel {
 	 */
 	public void viewer() {
 		try{
-			if (instances !=null){
+			if (inst !=null){
 				ViewerDialog dialog = new ViewerDialog(null);
-				dialog.setTableViewer(instances, strAttribute, numAttributes,numInstances);
+				dialog.setTableViewer(inst.getData(), inst.attributeName, inst.getNumAttribute(),inst.getNumInstance());
 				dialog.setVisible(true);
 			}
 		}catch (NegativeArraySizeException nase){
