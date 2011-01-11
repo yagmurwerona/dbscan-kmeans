@@ -317,7 +317,7 @@ public class Kmeans {
 			if (! hasMovement) {break;}
 		}
 		System.out.println("KMEANS: CLUSTER finishes trainig\n");
-		this._iterator = iterator;
+		this._iterator = iterator-1;
 	}
 	
 	/**
@@ -326,9 +326,13 @@ public class Kmeans {
 	private void test () {
 		int [] cluster = new int [testSet.length];
 		long [] counts = new long [testSet.length];
+		Double SSR = 0.0;
 		for (int i = 0; i< testSet.length; i++) {
 			cluster[i] = nearestCentre(testSet[i]);
 			counts[cluster[i]] ++;
+			if (this._without == -1) { 
+				SSR += DistanceFunction.euclideanDistance(_centre[cluster[i]].centeroid, testSet[i]);
+			}
 		}
 		
 		String output = "Kmean clustering\n";
@@ -360,7 +364,10 @@ public class Kmeans {
 		}
 		output += "=========Testing===========\n";
 		output += "Cluster instances:\n";
-		
+		if (this._without == -1) { 
+			String sqr = String.format("%15.3f", SSR);
+			output += "Sum of squared errors " + sqr + "\n";
+		}
 		for (int i =0; i<this.num_cluster; i++) {
 			String tmp = String.format("%2.3f", (double) counts[i]/ testSet.length * 100);
 			output += "Cluster " + i + ":\t" + counts[i]+ "("+ tmp + " %)\n";
