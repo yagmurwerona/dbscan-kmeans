@@ -62,7 +62,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	
 	protected JLabel m_ThresholdLab = new JLabel("Threshold");
 	
-	protected JTextField m_ThresholdText = new JTextField("100");
+	protected JTextField m_ThresholdText = new JTextField("0.5");
 	
 	protected JLabel m_DistanceFunctionLab = new JLabel("DistanceFunction");
 	
@@ -78,7 +78,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	
 	protected JLabel m_ExperimentTypeLab = new JLabel("Experiment Type");
 	
-	protected JTextField m_ExperimentTypeText = new JTextField("66");
+	protected JTextField m_ExperimentTypeText = new JTextField("Kmeans Clustering");
 	
 	/** The output area for classification results */
 	protected JTextArea m_OutText = new JTextArea(20, 40);
@@ -683,6 +683,9 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						}
 						km.setReader(reader);
 						km.setExperimentType(percent);
+						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
 						progress += random.nextInt(100);
 						setProgress(Math.min(progress, 99));
 						km.run();
@@ -692,6 +695,9 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						testMode = 3;
 						km.setReader(reader);
 						km.setExperimentType(0);
+						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
 						progress += random.nextInt(100);
 						setProgress(Math.min(progress, 99));
 						km.run();
@@ -703,6 +709,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 							km.setReader(reader);
 							km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
 							km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+							km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
 							km.setExperimentType(102, sp.getReader());
 							progress += random.nextInt(100);
 							setProgress(Math.min(progress, 99));
@@ -715,6 +722,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						km.setReader(reader);
 						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
 						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
 						km.setExperimentType("" + m_ClassCombo.getItemAt(m_ClassCombo.getSelectedIndex()).toString().substring(6));
 						progress += random.nextInt(100);
 						setProgress(Math.min(progress, 99));
@@ -726,6 +734,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						km.setReader(reader);
 						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
 						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
 						progress += random.nextInt(100);
 						setProgress(Math.min(progress, 99));
 						km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
