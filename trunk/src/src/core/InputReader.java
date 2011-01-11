@@ -55,7 +55,7 @@ public class InputReader {
 		try {
 			while (scanner.hasNextLine()) {
 				String line = scanner.nextLine();
-				line = line.replaceAll(",\\s+", ",");
+				line = line.replaceAll(",\\s+", ","); //Remove redundant space
 				// ignore the empty line
 				if (line.compareTo("") != 0) {
 					String[] splitLine = line.split("\\s+");
@@ -130,7 +130,7 @@ public class InputReader {
 				// read data 
 				
 				String line = scanner.nextLine();
-				line = line.replaceAll(",\\s+", ",");
+				line = line.replaceAll(",\\s+", ",");//Remove redundant space
 				if (line.compareTo("") !=0) {
 					this.numInstances ++;
 					
