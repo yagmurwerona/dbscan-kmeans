@@ -24,6 +24,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import core.InputReader;
+import core.Instances;
+
 import base.ArrfFileFilter;
 public class SetInstancesPanel
   extends JPanel {
@@ -78,6 +81,8 @@ public class SetInstancesPanel
    * attribute. */
   protected boolean m_showClassComboBox;
   
+  private InputReader reader;
+  
   /**
    * Default constructor.
    */
@@ -104,7 +109,7 @@ public class SetInstancesPanel
     m_CloseBut.setToolTipText("Closes the dialog");
     m_OpenFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	setInstancesFromFileQ();
+    	  setInstancesFromFileQ();
       }
     });
     m_CloseBut.addActionListener(new ActionListener() {
@@ -181,10 +186,6 @@ public class SetInstancesPanel
 	@SuppressWarnings("deprecation")
   public void setInstancesFromFileQ() {
 		JFileChooser fc = new JFileChooser();
-		String[] instances;
-		String strAttribute="";
-		int numInstances = 0;
-		int numAttributes=0;
 		fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		ArrfFileFilter filter = new ArrfFileFilter();
 		fc.setFileFilter(filter);
@@ -192,79 +193,14 @@ public class SetInstancesPanel
 		if ((returnVal == JFileChooser.APPROVE_OPTION)
 				&& (fc.getSelectedFile().isFile())) {
 			File file = fc.getSelectedFile();
-
-			try {
-				Scanner scanner = new Scanner (new FileInputStream(file));
-
-				String str = "";
-				boolean isData=false;
-				while (scanner.hasNextLine()) {
-					// this statement reads the line from the file and print it to the console
-					str= scanner.nextLine();
-					if (str.indexOf("RELATION") >0){
-						m_Summary.setRelation(str.subSequence(str.indexOf("RELATION") + 9,str.length()).toString().toUpperCase());
-					}
-					if (str.indexOf("ATTRIBUTE") >0){
-						numAttributes ++;
-						//For Categorical value
-						if (str.indexOf("{") > 0)
-							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("{") -1) + ",";
-						else //For NUMERIC value
-							strAttribute += str.subSequence(str.indexOf("ATTRIBUTE") + 9,str.indexOf("NUMERIC") -1) + ",";
-					}
-					if (isData)
-						numInstances ++;
-					if (str.indexOf("DATA") >0)
-						isData= true;
-				}
-				m_Summary.setNumAttributes(numAttributes);
-				m_Summary.setNumInstances(numInstances);
-				m_Summary.updateValues();
-				scanner.close();
-				
-				Scanner scanner_tbl = new Scanner (new FileInputStream(file));
-				instances = new String[numInstances];
-				int i =0;
-				isData=false;
-				while (scanner_tbl.hasNextLine()) {
-					str= scanner_tbl.nextLine();
-					if (isData){
-						instances[i] = str;
-						i ++;
-					}
-					if (str.indexOf("DATA") >0)
-						isData= true;
-				}
-				scanner_tbl.close();
-			} catch (FileNotFoundException ex) {
-				ex.printStackTrace();
-			} catch (IOException es) {
-				es.printStackTrace();
-			}
-		} else {
-			System.out.println("wrong file");
+			InputReader reader = new InputReader(file.getAbsolutePath());
+			Instances inst = reader.getData();
+			m_Summary.setRelation(inst.getRelation());
+			m_Summary.setNumAttributes(inst.getNumInstance());
+			m_Summary.setNumInstances(inst.getNumAttribute());
+			m_Summary.updateValues();
+			setReader(reader);
 		}
-    
-//    if (m_IOThread == null) {
-//      int returnVal = m_FileChooser.showOpenDialog(this);
-//      if (returnVal == JFileChooser.APPROVE_OPTION) {
-//	final File selected = m_FileChooser.getSelectedFile();
-//	m_IOThread = new Thread() {
-//	  public void run() {
-//	    setInstancesFromFile(selected);
-//	    m_IOThread = null;
-//	  }
-//	};
-//	m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-//	m_IOThread.start();
-//      }
-//    } else {
-//      JOptionPane.showMessageDialog(this,
-//				    "Can't load at this time,\n"
-//				    + "currently busy with other IO",
-//				    "Load Instances",
-//				    JOptionPane.WARNING_MESSAGE);
-//    }
   }
   
   /**
@@ -381,4 +317,18 @@ public class SetInstancesPanel
   public boolean getReadIncrementally() {
     return m_readIncrementally;
   }
+
+/**
+ * @return the reader
+ */
+public InputReader getReader() {
+	return reader;
+}
+
+/**
+ * @param reader the reader to set
+ */
+public void setReader(InputReader reader) {
+	this.reader = reader;
+}
 }

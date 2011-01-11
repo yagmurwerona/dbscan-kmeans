@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -8,14 +9,18 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -30,22 +35,22 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import Kmeans.Kmeans;
 import core.InputReader;
-import core.Instance;
 
 @SuppressWarnings("serial")
-public class ClusterPanel extends JPanel {
-	
+public class ClusterPanel extends JPanel implements ActionListener,PropertyChangeListener {
 	
 	protected JLabel m_MaxIterationsLab = new JLabel("maxIterations");
 	
@@ -119,6 +124,10 @@ public class ClusterPanel extends JPanel {
 	private Vector<String> attributeNames;
 	private InputReader reader;
 	private ArrayList<Integer> flag;
+	
+	private JProgressBar progressBar;
+	private Task task;
+	private String type;
 
 	// protected Remove m_ignoreFilter = null;
 
@@ -155,8 +164,9 @@ public class ClusterPanel extends JPanel {
 	protected JFileChooser m_FileChooser = new JFileChooser(new File(
 			System.getProperty("user.dir")));
 
-	private String file;
-
+	private String fileTraining;
+	final SetInstancesPanel sp = new SetInstancesPanel();
+	
 	public ClusterPanel() {
 		// Connect / configure the components
 		m_OutText.setEditable(false);
@@ -216,11 +226,12 @@ public class ClusterPanel extends JPanel {
 		m_StopBut.setEnabled(false);
 
 		// m_ignoreBut.setEnabled(false);
-		m_StartBut.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				startClusterer();
-			}
-		});
+		m_StartBut.addActionListener(this);
+//		m_StartBut.addActionListener(new ActionListener() {
+//			public void actionPerformed(ActionEvent e) {
+//				startClusterer();
+//			}
+//		});
 		m_StopBut.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				stopClusterer();
@@ -234,18 +245,7 @@ public class ClusterPanel extends JPanel {
 			}
 		});
 		
-//	    if (inst.classIndex() == -1)
-//	      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
-//	    else
-//	      m_ClassCombo.setSelectedIndex(inst.classIndex());
 	    updateRadioLinks();
-
-		// Layout the GUI
-//		JPanel p1 = new JPanel();
-//		p1.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Clusterer"),
-//				BorderFactory.createEmptyBorder(0, 5, 5, 5)));
-//		p1.setLayout(new BorderLayout());
-		// p1.add(m_CLPanel, BorderLayout.NORTH);
 
 		JPanel p2 = new JPanel();
 		GridBagLayout gbL = new GridBagLayout();
@@ -442,6 +442,10 @@ public class ClusterPanel extends JPanel {
 		
 		//DBScan option is chosen first 
 		updateOption(false);
+		
+		progressBar = new JProgressBar(0, 100);
+        progressBar.setValue(0);
+        progressBar.setStringPainted(true);
 
 		JPanel buttons = new JPanel();
 		buttons.setLayout(new GridLayout(2, 1));
@@ -454,9 +458,10 @@ public class ClusterPanel extends JPanel {
 		JPanel ib = new JPanel();
 		ib.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		ib.setLayout(new GridLayout(1, 1, 5, 5));
+		ib.add(progressBar);
 		// ib.add(m_ignoreBut);
-		buttons.add(ib);
 		buttons.add(ssButs);
+		buttons.add(ib);
 
 		JPanel p3 = new JPanel();
 		p3.setBorder(BorderFactory.createTitledBorder("Clusterer output"));
@@ -526,7 +531,6 @@ public class ClusterPanel extends JPanel {
 	 */
 	protected void setTestSet() {
 		if (m_SetTestFrame == null) {
-			final SetInstancesPanel sp = new SetInstancesPanel();
 			m_SetTestFrame = new JFrame("Test Instances");
 			m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
 			m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
@@ -542,83 +546,7 @@ public class ClusterPanel extends JPanel {
 	 * results history panel.
 	 */
 	protected void startClusterer() {
-		if (m_RunThread == null && file != null) {
-			m_StartBut.setEnabled(false);
-			m_StopBut.setEnabled(true);
-			
-			m_RunThread = new Thread() {
-				public void run() {
-					int testMode;
-					int percent = 66;
-					try {
-						testMode = 0;
-						
-						if (m_PercentBut.isSelected()) {
-							testMode = 2;
-							percent = Integer.parseInt(m_PercentText.getText());
-							if ((percent <= 0) || (percent >= 100)) {
-								throw new Exception(
-										"Percentage must be between 0 and 100");
-							}
-						} else if (m_TrainBut.isSelected()) {
-							testMode = 3;
-						} else if (m_TestSplitBut.isSelected()) {
-							testMode = 4;
-							// Check the test instance compatibility
-							// Code...
-						} else if (m_ClassesToClustersBut.isSelected()) {
-							testMode = 5;
-						} else if  (m_NoiseRemovalBut.isSelected()){
-							testMode = 6;
-						} else {
-							try {
-								throw new Exception("Unknown test mode");
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						Kmeans km = new Kmeans();
-//						km.setInput(file); -> to avoid read a file twice.
-						km.setReader(reader);
-						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-						System.out.println(testMode);
-						if (testMode == 6) {// noise removal
-							km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
-						} else if (testMode ==2) { // train on percent %, test on the rest
-							km.setExperimentType(percent);
-							km.run();
-						} else if (testMode ==3) {//train on full data and test on full data
-							km.setExperimentType(0);
-							km.run();
-						} else if (testMode ==4) {//train on full data, test on supplied data
-//							km.setExperimentType(102, test_filename);
-							km.run();
-						} else if (testMode ==5) {// cluster according to the target attribute
-//							km.setTargetAttribute(target)
-							km.setExperimentType("class");
-							km.run();
-						}
-						
-						
-						
-						m_OutText.setText(km.getOutput().getContent());
-					} catch (Exception ex) {
-						ex.printStackTrace();
-						JOptionPane.showMessageDialog(ClusterPanel.this,
-										"Problem evaluating clusterer:\n"+ ex.getMessage(),
-										"Evaluate clusterer",
-										JOptionPane.ERROR_MESSAGE);
-					} finally {
-						m_RunThread = null;
-						m_StartBut.setEnabled(true);
-						m_StopBut.setEnabled(false);
-					}
-				}
-			};
-			m_RunThread.setPriority(Thread.MIN_PRIORITY);
-			m_RunThread.start();
-		}
+		task.doInBackground();
 	}
 
 	/**
@@ -626,13 +554,10 @@ public class ClusterPanel extends JPanel {
 	 */
 	@SuppressWarnings("deprecation")
 	protected void stopClusterer() {
-
 		if (m_RunThread != null) {
 			m_RunThread.interrupt();
-
 			// This is deprecated (and theoretically the interrupt should do).
 			m_RunThread.stop();
-
 		}
 	}
 
@@ -663,21 +588,6 @@ public class ClusterPanel extends JPanel {
 		if (m_NoiseRemovalBut.isSelected()){
 			m_PercentBut.setSelected(true);
 		}
-	}
-
-	/**
-	 * @return the file
-	 */
-	public String getFile() {
-		return file;
-	}
-
-	/**
-	 * @param file
-	 *            the file to set
-	 */
-	public void setFile(String file) {
-		this.file = file;
 	}
 
 	/**
@@ -735,4 +645,163 @@ public class ClusterPanel extends JPanel {
 	public void setFlag(ArrayList<Integer> flag) {
 		this.flag = flag;
 	}
+	
+	 /**
+     * Invoked when task's progress property changes.
+     */
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("progress" == evt.getPropertyName()) {
+        	progressBar.setIndeterminate(true);
+            int progress = (Integer) evt.getNewValue();
+            progressBar.setValue(progress);
+        } 
+    }
+	class Task extends SwingWorker<Void, Void> {
+		
+		int progress = 0;
+	    Random random = new Random();
+        /*
+         * Main task. Executed in background thread.
+         */
+		@Override
+        public Void doInBackground() {
+            //Initialize progress property.
+            setProgress(0);
+			if (fileTraining != null && getType().equals("kmeans")) {
+				m_StartBut.setEnabled(false);
+				m_StopBut.setEnabled(true);
+				try {
+					Kmeans km = new Kmeans();
+					int testMode = 0;
+					int percent = 66;
+					if (m_PercentBut.isSelected()) {
+						testMode = 2;
+						percent = Integer.parseInt(m_PercentText.getText());
+						if ((percent <= 0) || (percent >= 100)) {
+							throw new Exception(
+									"Percentage must be between 0 and 100");
+						}
+						km.setReader(reader);
+						km.setExperimentType(percent);
+						progress += random.nextInt(100);
+						setProgress(Math.min(progress, 99));
+						km.run();
+						m_OutText.setText(km.getOutput().getContent());
+						setProgress(100);
+					} else if (m_TrainBut.isSelected()) {
+						testMode = 3;
+						km.setReader(reader);
+						km.setExperimentType(0);
+						progress += random.nextInt(100);
+						setProgress(Math.min(progress, 99));
+						km.run();
+						m_OutText.setText(km.getOutput().getContent());
+						setProgress(100);
+					} else if (m_TestSplitBut.isSelected()) {
+						testMode = 4;
+						if (sp.getReader() != null) {
+							km.setReader(reader);
+							km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+							km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+							km.setExperimentType(102, sp.getReader());
+							progress += random.nextInt(100);
+							setProgress(Math.min(progress, 99));
+							km.run();
+							m_OutText.setText(km.getOutput().getContent());
+							setProgress(100);
+						}
+					} else if (m_ClassesToClustersBut.isSelected()) {
+						testMode = 5;
+						km.setReader(reader);
+						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						km.setExperimentType("" + m_ClassCombo.getItemAt(m_ClassCombo.getSelectedIndex()).toString().substring(6));
+						progress += random.nextInt(100);
+						setProgress(Math.min(progress, 99));
+						km.run();
+						m_OutText.setText(km.getOutput().getContent());
+						setProgress(100);
+					} else if (m_NoiseRemovalBut.isSelected()){
+						testMode = 6;
+						km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
+						m_OutText.setText(km.getOutput().getContent());
+						setProgress(100);
+					}else {
+						try {
+							throw new Exception("Unknown test mode");
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					JOptionPane
+							.showMessageDialog(
+									ClusterPanel.this,
+									"Problem evaluating clusterer:\n"
+											+ ex.getMessage(),
+									"Evaluate clusterer",
+									JOptionPane.ERROR_MESSAGE);
+				}						
+			}
+			progress=0;
+            return null;
+        }
+
+        /*
+         * Executed in event dispatching thread
+         */
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            m_StartBut.setEnabled(true);
+            m_StopBut.setEnabled(false);
+            progressBar.setIndeterminate(false);
+            setCursor(null); //turn off the wait cursor
+        }
+    }
+	
+	/**
+     * Invoked when the user presses the start button.
+     */
+    public void actionPerformed(ActionEvent evt) {
+        m_StartBut.setEnabled(false);
+        m_StopBut.setEnabled(true);
+        m_OutText.setText("");
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        //Instances of javax.swing.SwingWorker are not reusuable, so
+        //we create new instances as needed.
+        task = new Task();
+        task.addPropertyChangeListener(this);
+        task.execute();
+    }
+
+	/**
+	 * @return the fileTraining
+	 */
+	public String getFileTraining() {
+		return fileTraining;
+	}
+
+	/**
+	 * @param fileTraining the fileTraining to set
+	 */
+	public void setFileTraining(String fileTraining) {
+		this.fileTraining = fileTraining;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	public void setType(String type) {
+		this.type = type;
+	}
 }
+

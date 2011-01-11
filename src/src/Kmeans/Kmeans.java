@@ -15,6 +15,7 @@ import core.*;
 public class Kmeans {
 	private Output out;
 	private InputReader reader;
+	private InputReader testrd;
 	private int num_cluster;
 	private String dfunction;
 	private int maxIterator = 500;
@@ -95,9 +96,9 @@ public class Kmeans {
 	 * @param type = 102
 	 * @param test_filename
 	 */
-	public void setExperimentType (int type, String test_filename) {
+	public void setExperimentType (int type, InputReader testrd) {
 		this.experimentType = type;
-		this.testfile = test_filename;
+		this.testrd = testrd;
 		if (type!=102) {
 			try {
 				throw new Exception();
@@ -191,7 +192,6 @@ public class Kmeans {
 				}
 			}
 			else { // test on another test set type = 102
-				InputReader testrd = new InputReader(this.testfile);
 				testSet = new Instance[testrd.data.numInstance];
 				for (int i = 0; i< testrd.data.numInstance; i++) {
 					testSet[i] = testrd.data.getInstance(i);
@@ -384,7 +384,6 @@ public class Kmeans {
 			output += "(~" + tmp + "%)\n";
 		}
 		this.out = new Output(output);
-		
 	} 
 	/**
 	 * Clustering the data regard to the target class (target attribute)
@@ -518,6 +517,18 @@ public class Kmeans {
 	
 	public String getAlg () {
 		return this.dfunction;
+	}
+	/**
+	 * @return the testrd
+	 */
+	public InputReader getTestrd() {
+		return testrd;
+	}
+	/**
+	 * @param testrd the testrd to set
+	 */
+	public void setTestrd(InputReader testrd) {
+		this.testrd = testrd;
 	}
 
 }

@@ -39,7 +39,8 @@ public class MainScreen extends JPanel {
 	String[] instances;
 	String strAttribute="";
 	Instances inst;
-
+	JRadioButtonMenuItem dbscan;
+	JRadioButtonMenuItem kmeans;
 	public MainScreen() {
 		// Set up the GUI layout
 	    JPanel menuPanel = new JPanel();
@@ -50,9 +51,9 @@ public class MainScreen extends JPanel {
 		JMenu viewMenu = new JMenu("View");
 		JMenu runMenu = new JMenu("Run");
 		ButtonGroup group = new ButtonGroup();
-		JRadioButtonMenuItem dbscan = new JRadioButtonMenuItem("DBScan");
+		dbscan = new JRadioButtonMenuItem("DBScan");
+		kmeans = new JRadioButtonMenuItem("KMeans");
 		dbscan.setSelected(true);
-		JRadioButtonMenuItem kmeans = new JRadioButtonMenuItem("KMeans");
 		group.add(dbscan);
 		group.add(kmeans);
 		menuBar.add(fileMenu);
@@ -100,6 +101,7 @@ public class MainScreen extends JPanel {
 	    dbscan.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				clusterPanel.setType("dbscan");
 				clusterPanel.updateOption(false);
 				clusterPanel.repaint();
 			}
@@ -108,6 +110,7 @@ public class MainScreen extends JPanel {
 	    kmeans.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				clusterPanel.setType("kmeans");
 				clusterPanel.updateOption(true);
 				clusterPanel.repaint();
 			}
@@ -136,17 +139,21 @@ public class MainScreen extends JPanel {
 		int returnVal = fc.showOpenDialog(this);
 		if ((returnVal == JFileChooser.APPROVE_OPTION)
 				&& (fc.getSelectedFile().isFile())) {
-			File file = fc.getSelectedFile();
-			InputReader reader = new InputReader(file.getAbsolutePath());
+			File fileTraining = fc.getSelectedFile();
+			InputReader reader = new InputReader(fileTraining.getAbsolutePath());
 			Instances inst = reader.getData();
 			m_AttSummaryPanel.setRelation(inst.getRelation());
 			m_AttSummaryPanel.setNumAttributes(inst.getNumInstance());
 			m_AttSummaryPanel.setNumInstances(inst.getNumAttribute());
 			m_AttSummaryPanel.setInfo();
-			clusterPanel.setFile(file.getAbsolutePath());
+			clusterPanel.setFileTraining(fileTraining.getAbsolutePath());
 			clusterPanel.setReader(reader);
 			clusterPanel.setFlag(reader.getFlag());
 			clusterPanel.setAttributeNames(inst.getAttributeName());
+			if (dbscan.isSelected())
+				clusterPanel.setType("dbscan");
+			else if (kmeans.isSelected())
+				clusterPanel.setType("kmeans");
 		} else {
 			System.out.println("wrong file");
 		}
