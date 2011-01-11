@@ -103,7 +103,6 @@ public class MainScreen extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				clusterPanel.setType("dbscan");
 				clusterPanel.updateOption(false);
-				clusterPanel.repaint();
 			}
 		});
 	    
@@ -112,7 +111,6 @@ public class MainScreen extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				clusterPanel.setType("kmeans");
 				clusterPanel.updateOption(true);
-				clusterPanel.repaint();
 			}
 		});
 	    
@@ -148,6 +146,7 @@ public class MainScreen extends JPanel {
 			m_AttSummaryPanel.setInfo();
 			clusterPanel.setFileTraining(fileTraining.getAbsolutePath());
 			clusterPanel.setReader(reader);
+			clusterPanel.m_StartBut.setEnabled(true);
 			clusterPanel.setFlag(reader.getFlag());
 			clusterPanel.setAttributeNames(inst.getAttributeName());
 			if (dbscan.isSelected())

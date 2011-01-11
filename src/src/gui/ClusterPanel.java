@@ -142,7 +142,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	};
 
 	/** Click to start running the clusterer */
-	protected JButton m_StartBut = new JButton("Start");
+	public JButton m_StartBut = new JButton("Start");
 
 	/** Stop the class combo from taking up to much space */
 	private Dimension COMBO_SIZE = new Dimension(250,
@@ -222,7 +222,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 			}
 		});
 		
-		m_StartBut.setEnabled(true);
+		m_StartBut.setEnabled(false);
 		m_StopBut.setEnabled(false);
 
 		// m_ignoreBut.setEnabled(false);
@@ -723,6 +723,11 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						setProgress(100);
 					} else if (m_NoiseRemovalBut.isSelected()){
 						testMode = 6;
+						km.setReader(reader);
+						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
+						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
+						progress += random.nextInt(100);
+						setProgress(Math.min(progress, 99));
 						km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
 						m_OutText.setText(km.getOutput().getContent());
 						setProgress(100);
