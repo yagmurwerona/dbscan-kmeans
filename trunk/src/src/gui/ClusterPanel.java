@@ -28,6 +28,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -48,6 +49,7 @@ import javax.swing.event.ChangeListener;
 
 import Kmeans.Kmeans;
 import core.InputReader;
+import dbscan.dbscan;
 
 @SuppressWarnings("serial")
 public class ClusterPanel extends JPanel implements ActionListener,PropertyChangeListener {
@@ -76,9 +78,13 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	
 	protected JTextField m_EpsText = new JTextField("0.9");
 	
-	protected JLabel m_ExperimentTypeLab = new JLabel("Experiment Type");
+//	protected JLabel m_ExperimentTypeLab = new JLabel("Experiment Type");
 	
-	protected JTextField m_ExperimentTypeText = new JTextField("Kmeans Clustering");
+//	protected JTextField m_ExperimentTypeText = new JTextField("66");
+	
+	protected JLabel m_UseKDLab = new JLabel("Use KDTree");
+	
+	protected JCheckBox m_UseKDCheck = new JCheckBox();
 	
 	/** The output area for classification results */
 	protected JTextArea m_OutText = new JTextArea(20, 40);
@@ -238,13 +244,6 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 			}
 		});
 
-		m_ClassCombo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// updateCapabilitiesFilter(m_ClustererEditor
-				// .getCapabilitiesFilter());
-			}
-		});
-		
 	    updateRadioLinks();
 
 		JPanel p2 = new JPanel();
@@ -348,8 +347,8 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		gbC.anchor = GridBagConstraints.WEST;
 		gbC.gridy = 7;
 		gbC.gridx = 0;
-		gbL.setConstraints(m_ExperimentTypeLab, gbC);
-		p2.add(m_ExperimentTypeLab);
+//		gbL.setConstraints(m_ExperimentTypeLab, gbC);
+//		p2.add(m_ExperimentTypeLab);
 
 		gbC = new GridBagConstraints();
 		gbC.anchor = GridBagConstraints.EAST;
@@ -357,8 +356,8 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		gbC.gridy = 7;
 		gbC.gridx = 1;
 		gbC.insets = new Insets(2, 10, 2, 10);
-		gbL.setConstraints(m_ExperimentTypeText, gbC);
-		p2.add(m_ExperimentTypeText);
+//		gbL.setConstraints(m_ExperimentTypeText, gbC);
+//		p2.add(m_ExperimentTypeText);
 		
 		gbC = new GridBagConstraints();
 		gbC.anchor = GridBagConstraints.WEST;
@@ -439,6 +438,22 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		gbC.insets = new Insets(2, 10, 2, 10);
 		gbL.setConstraints(m_EpsText, gbC);
 		p2.add(m_EpsText);
+		
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.WEST;
+		gbC.gridy = 13;
+		gbC.gridx = 0;
+		gbL.setConstraints(m_UseKDLab, gbC);
+		p2.add(m_UseKDLab);
+
+		gbC = new GridBagConstraints();
+		gbC.anchor = GridBagConstraints.EAST;
+		gbC.fill = GridBagConstraints.HORIZONTAL;
+		gbC.gridy = 13;
+		gbC.gridx = 1;
+		gbC.insets = new Insets(2, 10, 2, 10);
+		gbL.setConstraints(m_UseKDCheck, gbC);
+		p2.add(m_UseKDCheck);
 		
 		//DBScan option is chosen first 
 		updateOption(false);
@@ -539,14 +554,27 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		m_SetTestFrame.setVisible(true);
 	}
 
-	/**
-	 * Starts running the currently configured clusterer with the current
-	 * settings. This is run in a separate thread, and will only start if there
-	 * is no clusterer already running. The clusterer output is sent to the
-	 * results history panel.
-	 */
 	protected void startClusterer() {
-		task.doInBackground();
+//        m_RunThread = new Thread() {
+//			public void run() {
+//				try{
+//					m_RunThread = Thread.currentThread();
+//					for (int i =0; i< 5; i++){
+//						System.out.println("x");
+//						i=0;
+//					}
+//				} catch (Exception ex) {
+//					ex.printStackTrace();
+//					JOptionPane.showMessageDialog(ClusterPanel.this,
+//									"Problem evaluating clusterer:\n"+ ex.getMessage(),
+//									"Evaluate clusterer",
+//									JOptionPane.ERROR_MESSAGE);
+//				}
+//			}
+//		};
+//		m_RunThread.setPriority(Thread.MIN_PRIORITY);
+//		m_RunThread.start();
+//		System.out.println(m_RunThread.getState());
 	}
 
 	/**
@@ -576,11 +604,14 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 			m_NumClustersText.setEnabled(true);
 			m_ThresholdText.setEnabled(false);
 		}
+//		if (!m_ClassesToClustersBut.isSelected())
+//			m_ExperimentTypeText.setEnabled(true);
 	}
 	
 	public void updateOption(boolean choice) {
 		m_MinPointsText.setEnabled(!choice);
 		m_EpsText.setEnabled(!choice);
+		m_UseKDCheck.setEnabled(!choice);
 		m_MaxIterationsText.setEnabled(choice);
 		m_NumClustersText.setEnabled(choice);
 		m_ThresholdText.setEnabled(false);
@@ -656,6 +687,13 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
             progressBar.setValue(progress);
         } 
     }
+    
+    /**
+	 * Starts running the currently configured clusterer with the current
+	 * settings. This is run in a separate thread, and will only start if there
+	 * is no clusterer already running. The clusterer output is sent to the
+	 * results history panel.
+	 */
 	class Task extends SwingWorker<Void, Void> {
 		
 		int progress = 0;
@@ -665,98 +703,184 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
          */
 		@Override
         public Void doInBackground() {
+			m_RunThread = Thread.currentThread();
             //Initialize progress property.
             setProgress(0);
-			if (fileTraining != null && getType().equals("kmeans")) {
-				m_StartBut.setEnabled(false);
-				m_StopBut.setEnabled(true);
-				try {
-					Kmeans km = new Kmeans();
-					int testMode = 0;
-					int percent = 66;
-					if (m_PercentBut.isSelected()) {
-						testMode = 2;
-						percent = Integer.parseInt(m_PercentText.getText());
-						if ((percent <= 0) || (percent >= 100)) {
-							throw new Exception(
-									"Percentage must be between 0 and 100");
-						}
-						km.setReader(reader);
-						km.setExperimentType(percent);
-						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
-						progress += random.nextInt(100);
-						setProgress(Math.min(progress, 99));
-						km.run();
-						m_OutText.setText(km.getOutput().getContent());
-						setProgress(100);
-					} else if (m_TrainBut.isSelected()) {
-						testMode = 3;
-						km.setReader(reader);
-						km.setExperimentType(0);
-						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
-						progress += random.nextInt(100);
-						setProgress(Math.min(progress, 99));
-						km.run();
-						m_OutText.setText(km.getOutput().getContent());
-						setProgress(100);
-					} else if (m_TestSplitBut.isSelected()) {
-						testMode = 4;
-						if (sp.getReader() != null) {
-							km.setReader(reader);
-							km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-							km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-							km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
-							km.setExperimentType(102, sp.getReader());
-							progress += random.nextInt(100);
+			if (!checkValues()) {
+				JOptionPane.showMessageDialog(ClusterPanel.this,
+						"Please fill all options for running:\n", "",
+						JOptionPane.ERROR_MESSAGE);
+			} else {
+				if (fileTraining != null && getType().equals("kmeans")) {
+					m_StartBut.setEnabled(false);
+					m_StopBut.setEnabled(true);
+					try {
+						Kmeans km = new Kmeans(
+								Integer.parseInt(m_NumClustersText.getText()),
+								m_DistanceFunctionCombo.getSelectedItem()
+										.toString(),
+								Integer.parseInt(m_MaxIterationsText.getText()),
+								reader);
+						int percent = 66;
+						if (m_PercentBut.isSelected()) {
+							// testMode = 2;
+							percent = Integer.parseInt(m_PercentText.getText());
+							if ((percent <= 0) || (percent >= 100)) {
+								throw new Exception(
+										"Percentage must be between 0 and 100");
+							}
+							km.setExperimentType(percent);
+							progress += random.nextInt(50);
 							setProgress(Math.min(progress, 99));
 							km.run();
 							m_OutText.setText(km.getOutput().getContent());
 							setProgress(100);
+						} else if (m_TrainBut.isSelected()) {
+							// testMode = 3;
+							km.setExperimentType(0);
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							km.run();
+							m_OutText.setText(km.getOutput().getContent());
+							setProgress(100);
+						} else if (m_TestSplitBut.isSelected()) {
+							// testMode = 4;
+							if (sp.getReader() != null) {
+								km.setExperimentType(102, sp.getReader());
+								progress += random.nextInt(50);
+								setProgress(Math.min(progress, 99));
+								km.run();
+								m_OutText.setText(km.getOutput().getContent());
+								setProgress(100);
+							}
+						} else if (m_ClassesToClustersBut.isSelected()) {
+							// testMode = 5;
+							km.setExperimentType(""
+									+ m_ClassCombo
+											.getItemAt(
+													m_ClassCombo
+															.getSelectedIndex())
+											.toString().substring(6));
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							km.run();
+							m_OutText.setText(km.getOutput().getContent());
+							setProgress(100);
+						} else if (m_NoiseRemovalBut.isSelected()) {
+							// testMode = 6;
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							km.noiseRemove(Double.parseDouble(m_ThresholdText
+									.getText()));
+							m_OutText.setText(km.getOutput().getContent());
+							setProgress(100);
+						} else {
+							try {
+								throw new Exception("Unknown test mode");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
-					} else if (m_ClassesToClustersBut.isSelected()) {
-						testMode = 5;
-						km.setReader(reader);
-						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
-						km.setExperimentType("" + m_ClassCombo.getItemAt(m_ClassCombo.getSelectedIndex()).toString().substring(6));
-						progress += random.nextInt(100);
-						setProgress(Math.min(progress, 99));
-						km.run();
-						m_OutText.setText(km.getOutput().getContent());
-						setProgress(100);
-					} else if (m_NoiseRemovalBut.isSelected()){
-						testMode = 6;
-						km.setReader(reader);
-						km.setDistanceAlgorithm(m_DistanceFunctionCombo.getSelectedItem().toString());
-						km.setCluster(Integer.parseInt(m_NumClustersText.getText()));
-						km.setMaxIterator(Integer.parseInt(m_MaxIterationsText.getText()));
-						progress += random.nextInt(100);
-						setProgress(Math.min(progress, 99));
-						km.noiseRemove(Double.parseDouble(m_ThresholdText.getText()), km.getNumCluster(), km.getAlg());
-						m_OutText.setText(km.getOutput().getContent());
-						setProgress(100);
-					}else {
-						try {
-							throw new Exception("Unknown test mode");
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
+						JOptionPane
+								.showMessageDialog(
+										ClusterPanel.this,
+										"Problem evaluating clusterer:\n"
+												+ ex.getMessage(),
+										"Evaluate clusterer",
+										JOptionPane.ERROR_MESSAGE);
 					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					JOptionPane
-							.showMessageDialog(
-									ClusterPanel.this,
-									"Problem evaluating clusterer:\n"
-											+ ex.getMessage(),
-									"Evaluate clusterer",
-									JOptionPane.ERROR_MESSAGE);
-				}						
+				} else if (fileTraining != null && getType().equals("dbscan")) { // Qdbscan
+					m_StartBut.setEnabled(false);
+					m_StopBut.setEnabled(true);
+					try {
+						dbscan dbsc = new dbscan(reader, m_EpsText.getText(),
+								m_MinPointsText.getText(),
+								m_DistanceFunctionCombo.getSelectedItem()
+										.toString(),
+								m_PercentText.getText());
+						if (m_UseKDCheck.isSelected())
+							dbsc.setUsingKD("1");
+						else
+							dbsc.setUsingKD("0");
+						int percent = 66;
+						if (m_PercentBut.isSelected()) {
+							// testMode = 2;
+							percent = Integer.parseInt(m_PercentText.getText());
+							if ((percent <= 0) || (percent >= 100)) {
+								throw new Exception(
+										"Percentage must be between 0 and 100");
+							}
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							dbsc.preProcessing();
+							progress += random.nextInt(20);
+							setProgress(Math.min(progress, 99));
+							dbsc.SuggestEps(4, "eps_test.xls");
+							dbsc.RunDBSCAN();
+							m_OutText.setText(dbsc.getOutput().getContent());
+							setProgress(100);
+						} else if (m_TrainBut.isSelected()) {
+							// testMode = 3;
+							dbsc.setExperimentType("" + 101);
+							dbsc.preProcessing();
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							dbsc.SuggestEps(4, "eps_test.xls");
+							dbsc.RunDBSCAN();
+							m_OutText.setText(dbsc.getOutput().getContent());
+							setProgress(100);
+						} else if (m_TestSplitBut.isSelected()) {
+							// testMode = 4;
+							if (sp.getReader() != null) {
+								dbsc.setExperimentType("" + 102);
+								dbsc.setTestfile(sp.getReader());
+								progress += random.nextInt(50);
+								setProgress(Math.min(progress, 99));
+								dbsc.preProcessing();
+								progress += random.nextInt(20);
+								setProgress(Math.min(progress, 99));
+								dbsc.SuggestEps(4, "eps_test.xls");
+								dbsc.RunDBSCAN();
+								m_OutText
+										.setText(dbsc.getOutput().getContent());
+								setProgress(100);
+							}
+						} else if (m_ClassesToClustersBut.isSelected()) {
+							// testMode = 5;
+							dbsc.setTarget(""
+									+ m_ClassCombo
+											.getItemAt(
+													m_ClassCombo
+															.getSelectedIndex())
+											.toString().substring(6));
+							progress += random.nextInt(50);
+							setProgress(Math.min(progress, 99));
+							dbsc.preProcessing();
+							progress += random.nextInt(20);
+							setProgress(Math.min(progress, 99));
+							dbsc.SuggestEps(4, "eps_test.xls");
+							dbsc.RunDBSCAN();
+							m_OutText.setText(dbsc.getOutput().getContent());
+							setProgress(100);
+						} else {
+							try {
+								throw new Exception("Unknown test mode");
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					} catch (Exception ex) {
+						JOptionPane
+								.showMessageDialog(
+										ClusterPanel.this,
+										"Problem evaluating clusterer:\n"
+												+ ex.getMessage(),
+										"Evaluate clusterer",
+										JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 			progress=0;
             return null;
@@ -772,6 +896,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
             m_StopBut.setEnabled(false);
             progressBar.setIndeterminate(false);
             setCursor(null); //turn off the wait cursor
+            progressBar.setValue(0);
         }
     }
 	
@@ -787,7 +912,23 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
         //we create new instances as needed.
         task = new Task();
         task.addPropertyChangeListener(this);
-        task.execute();
+		task.execute();
+    }
+    
+    public boolean checkValues(){
+    	System.out.println(getType());
+    	if (getType().equals("kmeans")){
+			if (m_MaxIterationsText.getText().equals("")
+				 || m_NumClustersText.getText().equals("")
+				 || (m_NoiseRemovalBut.isSelected() &&
+				 m_ThresholdText.getText().equals("")))
+				return false;
+    	} else if (getType().equals("dbscan")) {
+			if (m_MinPointsText.getText().equals("")
+					|| m_EpsText.getText().equals(""))
+			return false;
+    	}
+    	return true;
     }
 
 	/**

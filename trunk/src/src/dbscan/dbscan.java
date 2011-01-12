@@ -1,11 +1,10 @@
-
 package dbscan;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
-
 
 import core.InputReader;
 import core.Instance;
@@ -22,6 +21,7 @@ public class dbscan {
 
 	private Output out;
 	private InputReader reader;
+	private InputReader testrd;
 	private double Eps;       
 	private int MinPts;
 	private String DistFunc; //distance function
@@ -30,7 +30,6 @@ public class dbscan {
 	private int experimentType; 
 	private Instance[] trainSet;
 	private Instance[] testSet;
-	private String testfilename;
 	
 	//using KDTree
 	private KDTreeStorage trainstore;
@@ -38,30 +37,15 @@ public class dbscan {
 	private int usingkd;
 	
 	
-	public dbscan(String filename, String target, String eps, String minPts, String distFunc, String exptype, String usekd)
+	public dbscan(InputReader reader, String eps, String minPts, String distFunc, String exptype)
 	{
-		reader = new InputReader (filename);
+		this.reader = reader;
 		Eps= Double.parseDouble(eps);
 		MinPts = Integer.parseInt(minPts);
 		DistFunc = distFunc;
-		setTarget(target);
 		experimentType=Integer.parseInt(exptype);
-		usingkd=Integer.parseInt(usekd);
 	}
-	
-	public dbscan(String filename)
-	{
-		reader = new InputReader (filename);
-		Eps=0.9;
-		MinPts=6;
-		DistFunc="Euclidean";
-		experimentType=101;   //test on all train
-		targetId=-1;
-		usingkd=0; //default
-	
-	}
-	
-	
+		
 	public void setEps(double eps)
 	{
 		Eps = eps;
@@ -129,17 +113,11 @@ public class dbscan {
 		return targetId;
 	}
 	
-	public void setTestfile(String testfile)
+	public void setTestfile(InputReader reader)
 	{
-		testfilename=testfile;
-		
+		this.testrd = reader;
 	}
 	
-	public String getTestfile()
-	{
-		return testfilename;
-		
-	}
 	
 	public void setUsingKD(String i)
 	{
@@ -236,7 +214,7 @@ public class dbscan {
 		}
 		this.out= new Output(output);
 		
-		System.out.print(output);
+//		System.out.print(output);
 	}
 	
 	/** 
@@ -295,7 +273,6 @@ public class dbscan {
 				}
 			}
 			else { // test on another test set type = 102
-				InputReader testrd = new InputReader(this.testfilename);
 				testSet = new Instance[testrd.data.numInstance];
 				for (int i = 0; i< testrd.data.numInstance; i++) {
 					testSet[i] = testrd.data.getInstance(i);
@@ -525,8 +502,6 @@ public class dbscan {
 		output +=this.DistFunc;
 		
 		return output;
-		
-		
 	}
 	/** 
 	 * 	output the result of training
@@ -915,6 +890,4 @@ public class dbscan {
 		}
 		clusterId[id] = -1;
 	}
-	
-	
 }
