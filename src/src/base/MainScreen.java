@@ -36,8 +36,6 @@ public class MainScreen extends JPanel {
 	AttributeSummaryPanel m_AttSummaryPanel = new AttributeSummaryPanel();
 	ClusterPanel clusterPanel = new ClusterPanel();
 	static JFrame jf = new JFrame("Preprocess");
-	String[] instances;
-	String strAttribute="";
 	Instances inst;
 	JRadioButtonMenuItem dbscan;
 	JRadioButtonMenuItem kmeans;
