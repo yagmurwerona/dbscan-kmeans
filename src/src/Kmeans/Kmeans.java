@@ -25,7 +25,6 @@ public class Kmeans {
 	private int _without = -1; // by default: dont choose any attribute as the target attribute
 	
 	private String targetAttribute = "";
-	private String testfile = "";
 	
 	private Instance[] trainSet;
 	private Instance[] testSet;
@@ -35,22 +34,25 @@ public class Kmeans {
 	/**
 	 * Constructor
 	 */
-	public Kmeans () {
-		out = new Output();
-		reader = null;
-		num_cluster = 3; //by default 3
-		this._centre = new Centre[num_cluster]; 
-		dfunction = "Euclidean"; // by default
-	}
+	//LinhNT - take it from user's interface
+//	public Kmeans () {
+//		out = new Output();
+//		reader = null;
+////		num_cluster = 3; //by default 3 
+//		this._centre = new Centre[num_cluster]; 
+//		dfunction = "Euclidean"; // by default
+//	}
 	/**
 	 * Constructor fucntion 
 	 * @param ncluster
 	 * @param distanceAlg
 	 * @param maxIter
 	 */
-	public Kmeans (int ncluster, String distanceAlg, int maxIter) {
+	//Modify by LinhNT
+	//Purpose: optimize code in ClusterPanel when getting values from UI
+	public Kmeans (int ncluster, String distanceAlg, int maxIter, InputReader reader) {
 		out = new Output();
-		reader = null;
+		this.reader = reader;
 		num_cluster = ncluster;
 		dfunction = distanceAlg;
 		maxIterator = maxIter;
@@ -58,7 +60,7 @@ public class Kmeans {
 	}
 	
 	public void setCluster (int ncluster){
-		System.out.println("Log: Number of cluster is set " + ncluster);
+//		System.out.println("Log: Number of cluster is set " + ncluster);
 		this.num_cluster =  ncluster;
 		this._centre = new Centre [ncluster];
 		for (int i = 0; i< ncluster; i++) {_centre[i] = new Centre();}
@@ -149,16 +151,14 @@ public class Kmeans {
 			trainSet = new Instance[beTrained];
 			testSet = new Instance[total-beTrained];
 			
-			Random rn = new  Random (1234);
-			int flag[] = new int[total];
-			
+			Random rn = new  Random(1234);
+			int[] flag = new int[total];
+			int selected;
 			while (beTrained -- >0) {
-				int selected;
 				do {
 					selected = rn.nextInt(total);
 				} while (flag[selected] == 1);
-				flag[selected] =1;
-				
+				flag[selected] = 1;
 			}
 			int u = 0;
 			int v = 0;
@@ -253,8 +253,8 @@ public class Kmeans {
 		boolean [] flag = new boolean [trainSet.length];
 //		System.out.println("Randomly selection seeds " + trainSet.length);
 		Random r = new Random(123);
+		int k = 0;
 		for (int i = 0; i< this.num_cluster; i++) {
-			int k = 0;
 			do {
 				k = r.nextInt(trainSet.length);
 			} while (flag[k]);
@@ -295,7 +295,7 @@ public class Kmeans {
 	 */
 	private void cluster () {
 		selectRandomSeed();
-		System.out.println("Log: Finishing randomly selecting seeds");
+//		System.out.println("Log: Finishing randomly selecting seeds");
 		int iterator = 0;
 		boolean hasMovement; // mark the change on loop
 		while (iterator++ <this.maxIterator) {
@@ -445,11 +445,13 @@ public class Kmeans {
 	 * @param: number of cluster
 	 * @param: Distance Algorithm (Euclidean or Mahattan)
 	 */
-	public void noiseRemove (Double false_threshold, int cluster, String distanceAlgorithm) {
+//	public void noiseRemove (Double false_threshold, int cluster, String distanceAlgorithm) {
+	public void noiseRemove (Double false_threshold) {
 		//setting for all
 		this.setExperimentType(0); // for taking all training data in training step
-		this.setCluster(cluster);
-		this.setDistanceAlgorithm(distanceAlgorithm);
+//		this.setCluster(cluster);
+//		this.setDistanceAlgorithm(distanceAlgorithm);
+		this.setCluster(this.num_cluster);
 		prepareData();
 		if (trainSet.length != this.reader.numInstances) {
 			try {
@@ -525,17 +527,4 @@ public class Kmeans {
 	public String getAlg () {
 		return this.dfunction;
 	}
-	/**
-	 * @return the testrd
-	 */
-	public InputReader getTestrd() {
-		return testrd;
-	}
-	/**
-	 * @param testrd the testrd to set
-	 */
-	public void setTestrd(InputReader testrd) {
-		this.testrd = testrd;
-	}
-
 }
