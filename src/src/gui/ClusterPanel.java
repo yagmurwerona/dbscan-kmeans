@@ -101,6 +101,14 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	/** Click to set test mode to classes to clusters based evaluation */
 	protected JRadioButton m_ClassesToClustersBut = new JRadioButton("Classes to clusters evaluation");
 
+	
+	/**
+	 * Lets the user select the class column for classes to clusters based
+	 * evaluation
+	 */
+	
+
+	
 	/**
 	 * Lets the user select the class column for classes to clusters based
 	 * evaluation
@@ -210,6 +218,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		bg.add(m_PercentBut);
 		bg.add(m_TestSplitBut);
 		bg.add(m_ClassesToClustersBut);
+	
 		bg.add(m_NoiseRemovalBut);
 		
 		m_TrainBut.addActionListener(m_RadioListener);
@@ -599,7 +608,8 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		}
 		m_PercentText.setEnabled(m_PercentBut.isSelected());
 		m_PercentLab.setEnabled(m_PercentBut.isSelected());
-		m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
+	    m_ClassCombo.setEnabled(m_ClassesToClustersBut.isSelected());
+		
 		if (!m_NoiseRemovalBut.isSelected() && m_MaxIterationsText.isEnabled()){
 			m_NumClustersText.setEnabled(true);
 			m_ThresholdText.setEnabled(false);
@@ -615,6 +625,8 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 		m_MaxIterationsText.setEnabled(choice);
 		m_NumClustersText.setEnabled(choice);
 		m_ThresholdText.setEnabled(false);
+		m_ClassesToClustersBut.setEnabled(choice);
+		//m_ClassCombo.setEnabled(!choice);
 		m_NoiseRemovalBut.setEnabled(choice);
 		if (m_NoiseRemovalBut.isSelected()){
 			m_PercentBut.setSelected(true);
@@ -795,6 +807,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 					m_StartBut.setEnabled(false);
 					m_StopBut.setEnabled(true);
 					try {
+						/*
 						dbscan dbsc = new dbscan(reader, m_EpsText.getText(),
 								m_MinPointsText.getText(),
 								m_DistanceFunctionCombo.getSelectedItem()
@@ -864,13 +877,88 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 							dbsc.RunDBSCAN();
 							m_OutText.setText(dbsc.getOutput().getContent());
 							setProgress(100);
-						} else {
-							try {
-								throw new Exception("Unknown test mode");
-							} catch (Exception e) {
-								e.printStackTrace();
+							
+							*/
+						
+						///quynh
+						
+					
+						/*
+						dbscan dbsc = new dbscan(reader, m_EpsText.getText(),
+								m_MinPointsText.getText(),
+								m_DistanceFunctionCombo.getSelectedItem()
+										.toString(),
+								m_PercentText.getText());
+								*/
+						m_ClassesToClustersBut.setEnabled(false);
+						String usingkd;
+						
+						String distfunc= m_DistanceFunctionCombo.getSelectedItem().toString();
+						if (m_UseKDCheck.isSelected())
+							usingkd="1";
+						else
+							usingkd="0";
+						String experimenttype="101"; //default
+						int percent = 66;
+						if (m_PercentBut.isSelected()) 
+						{
+							// testMode = 2;
+							percent = Integer.parseInt(m_PercentText.getText());
+							if ((percent <= 0) || (percent >= 100)) 
+							{
+								throw new Exception(
+										"Percentage must be between 0 and 100");
+								
+								
 							}
+							else
+							{
+								experimenttype = m_PercentText.getText();
+							}
+							
+						} 
+						else if (m_TrainBut.isSelected()) 
+						{
+							// testMode = 3;
+							experimenttype ="101";
+						} 
+						if (m_TestSplitBut.isSelected()) 
+						{
+							// testMode = 4;
+							experimenttype ="102";
 						}
+							
+							
+						
+															
+						dbscan dbsc= new dbscan(reader, m_EpsText.getText(), m_MinPointsText.getText(), distfunc, experimenttype);
+						dbsc.setTarget("-1");
+						dbsc.setUsingKD(usingkd);
+						if (experimenttype.equals("102"))
+								if (sp.getReader()!=null)
+									dbsc.setTestfile(sp.getReader());
+								else
+								{
+									experimenttype="101";
+									dbsc.setExperimentType(experimenttype);
+								}
+						
+						progress += random.nextInt(50);
+						setProgress(Math.min(progress, 99));
+						dbsc.preProcessing();
+						progress += random.nextInt(20);
+						setProgress(Math.min(progress, 99));
+						//dbsc.SuggestEps(4, "eps_test.xls");
+						dbsc.RunDBSCAN();
+						m_OutText.setText(dbsc.getOutput().getContent());
+						setProgress(100);
+							
+						
+						
+						
+						
+						
+						
 					} catch (Exception ex) {
 						JOptionPane
 								.showMessageDialog(
