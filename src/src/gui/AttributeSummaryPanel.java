@@ -31,7 +31,7 @@ public class AttributeSummaryPanel extends JPanel {
 	protected JLabel lblNumInstances = new JLabel(NO_SOURCE);
 
 	/** Displays the number of unique values */
-	protected JLabel lblSumOfWeights = new JLabel(NO_SOURCE);
+//	protected JLabel lblSumOfWeights = new JLabel(NO_SOURCE);
 
 	public AttributeSummaryPanel() {
 		JPanel simple = new JPanel();
@@ -97,24 +97,25 @@ public class AttributeSummaryPanel extends JPanel {
 		simple.add(lblNumInstances);
 		lblNumInstances.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
 
-		lab = new JLabel("Sum of Weights:", SwingConstants.RIGHT);
-		lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.EAST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 1;
-		gbC.gridx = 4;
-		gbL.setConstraints(lab, gbC);
-		simple.add(lab);
-		gbC = new GridBagConstraints();
-		gbC.anchor = GridBagConstraints.WEST;
-		gbC.fill = GridBagConstraints.HORIZONTAL;
-		gbC.gridy = 1;
-		gbC.gridx = 5;
-		gbC.weightx = 100;
-		gbL.setConstraints(lblSumOfWeights, gbC);
-		simple.add(lblSumOfWeights);
-		lblSumOfWeights.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
+//		lab = new JLabel("Sum of Weights:", SwingConstants.RIGHT);
+//		lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
+//		gbC = new GridBagConstraints();
+//		gbC.anchor = GridBagConstraints.EAST;
+//		gbC.fill = GridBagConstraints.HORIZONTAL;
+//		gbC.gridy = 1;
+//		gbC.gridx = 4;
+//		gbL.setConstraints(lab, gbC);
+//		simple.add(lab);
+		
+//		gbC = new GridBagConstraints();
+//		gbC.anchor = GridBagConstraints.WEST;
+//		gbC.fill = GridBagConstraints.HORIZONTAL;
+//		gbC.gridy = 1;
+//		gbC.gridx = 5;
+//		gbC.weightx = 100;
+//		gbL.setConstraints(lblSumOfWeights, gbC);
+//		simple.add(lblSumOfWeights);
+//		lblSumOfWeights.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
 
 		setLayout(new BorderLayout());
 		add(simple, BorderLayout.NORTH);
