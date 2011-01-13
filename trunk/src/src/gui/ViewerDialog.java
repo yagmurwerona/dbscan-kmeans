@@ -7,6 +7,8 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -25,21 +27,9 @@ public class ViewerDialog extends JDialog implements ChangeListener {
 	/** for serialization */
 	private static final long serialVersionUID = 6747718484736047752L;
 
-	/** Signifies an OK property selection */
-	public static final int APPROVE_OPTION = 0;
-
-	/** Signifies a cancelled property selection */
-	public static final int CANCEL_OPTION = 1;
-
-	/** the result of the user's action, either OK or CANCEL */
-	protected int m_Result = CANCEL_OPTION;
-
 	/** Click to activate the current set parameters */
 	protected JButton m_OkButton = new JButton("OK");
 
-	/** Click to cancel the dialog */
-	protected JButton m_CancelButton = new JButton("Cancel");
-	
 	/** Displays other stats in a table */
 	protected JTable tableViewer = new JTable();
 
@@ -71,20 +61,18 @@ public class ViewerDialog extends JDialog implements ChangeListener {
 		panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(panel, BorderLayout.SOUTH);
 		getContentPane().add(panel, BorderLayout.SOUTH);
-		m_CancelButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				m_Result = CANCEL_OPTION;
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
 				setVisible(false);
 			}
 		});
+			
 		m_OkButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				m_Result = APPROVE_OPTION;
 				setVisible(false);
 			}
 		});
 		panel.add(m_OkButton);
-		panel.add(m_CancelButton);
 
 		pack();
 		Toolkit kit = Toolkit.getDefaultToolkit();
@@ -92,6 +80,7 @@ public class ViewerDialog extends JDialog implements ChangeListener {
 		int screenHeight = screenSize.height;
 		int screenWidth = screenSize.width;
 		setLocation(screenWidth / 8, screenHeight / 4);
+		setVisible(true);
 	}
 
 	/**
