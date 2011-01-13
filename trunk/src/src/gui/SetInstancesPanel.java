@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 import core.InputReader;
 import core.Instances;
 
-import base.ArrfFileFilter;
 public class SetInstancesPanel
   extends JPanel {
 
@@ -202,83 +201,6 @@ public class SetInstancesPanel
 			setReader(reader);
 		}
   }
-  
-  /**
-   * Loads results from a set of instances contained in the supplied
-   * file.
-   *
-   * @param f a value of type 'File'
-   */
-//  protected void setInstancesFromFile(File f) {
-//    boolean incremental = m_readIncrementally;
-//    
-//    try {
-//      m_Loader = ConverterUtils.getLoaderForFile(f);
-//      if (m_Loader == null)
-//	throw new Exception("No suitable FileSourcedConverter found for file!\n" + f);
-//      
-//      // not an incremental loader?
-//      if (!(m_Loader instanceof IncrementalConverter))
-//	incremental = false;
-//
-//      // load
-//      ((FileSourcedConverter) m_Loader).setFile(f);
-//      if (incremental) {
-//        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
-//	setInstances(m_Loader.getStructure());
-//      } else {
-//        // If we are batch loading then we will know for sure that
-//        // the data has no instances
-//        m_Summary.setShowZeroInstancesAsUnknown(false);
-//	setInstances(m_Loader.getDataSet());
-//      }
-//    } catch (Exception ex) {
-//      JOptionPane.showMessageDialog(this,
-//				    "Couldn't read from file:\n"
-//				    + f.getName(),
-//				    "Load Instances",
-//				    JOptionPane.ERROR_MESSAGE);
-//    }
-//  }
-
-  /**
-   * Updates the set of instances that is currently held by the panel.
-   *
-   * @param i a value of type 'Instances'
-   */
-//  public void setInstances(Instances i) {
-//
-//    m_Instances = i;
-//    m_Summary.setInstances(m_Instances);
-//    
-//    if (m_showClassComboBox) {
-//      DefaultComboBoxModel model = (DefaultComboBoxModel) m_ClassComboBox.getModel();
-//      model.removeAllElements();
-//      model.addElement(NO_CLASS);
-//      for (int n = 0; n < m_Instances.numAttributes(); n++) {
-//	Attribute att = m_Instances.attribute(n);
-//	String type = "(" + Attribute.typeToStringShort(att) + ")";
-//	model.addElement(type + " " + att.name());
-//      }
-//      if (m_Instances.classIndex() == -1)
-//	m_ClassComboBox.setSelectedIndex(m_Instances.numAttributes());
-//      else
-//	m_ClassComboBox.setSelectedIndex(m_Instances.classIndex() + 1);   // +1 because of NO_CLASS element
-//    }
-//    
-//    // Fire property change event for those interested.
-//    m_Support.firePropertyChange("", null, null);
-//  }
-
-  /**
-   * Gets the set of instances currently held by the panel.
-   *
-   * @return a value of type 'Instances'
-   */
-//  public Instances getInstances() {
-//    
-//    return m_Instances;
-//  }
 
   /**
    * Returns the currently selected class index.
