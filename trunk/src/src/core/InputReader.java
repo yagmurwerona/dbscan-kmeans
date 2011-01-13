@@ -31,11 +31,6 @@ public class InputReader {
 	private Constant C = new Constant();
 	private boolean missingVal [];
 	
-	public InputReader () {
-		this.filename = "";
-		this.data = new Instances();
-	}
-	
 	public InputReader (String fn) {
 		this.filename = fn;		
 		try {
