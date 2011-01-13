@@ -133,23 +133,23 @@ public class InstancesSummaryPanel
     m_NumAttributesLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
 								 0, 10));
     
-    lab = new JLabel("Sum of weights:", SwingConstants.RIGHT);
-    lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 2;
-    gbLayout.setConstraints(lab, gbConstraints);
-    add(lab);
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.WEST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1;     gbConstraints.gridx = 3;
-    gbConstraints.weightx = 100;
-    gbLayout.setConstraints(m_sumOfWeightsLab, gbConstraints);
-    add(m_sumOfWeightsLab);
-    m_sumOfWeightsLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
-                                                                 0, 10));
+//    lab = new JLabel("Sum of weights:", SwingConstants.RIGHT);
+//    lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+//    gbConstraints = new GridBagConstraints();
+//    gbConstraints.anchor = GridBagConstraints.EAST;
+//    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+//    gbConstraints.gridy = 1;     gbConstraints.gridx = 2;
+//    gbLayout.setConstraints(lab, gbConstraints);
+//    add(lab);
+//    gbConstraints = new GridBagConstraints();
+//    gbConstraints.anchor = GridBagConstraints.WEST;
+//    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+//    gbConstraints.gridy = 1;     gbConstraints.gridx = 3;
+//    gbConstraints.weightx = 100;
+//    gbLayout.setConstraints(m_sumOfWeightsLab, gbConstraints);
+//    add(m_sumOfWeightsLab);
+//    m_sumOfWeightsLab.setBorder(BorderFactory.createEmptyBorder(0, 5,
+//                                                                 0, 10));
     
   }
   
