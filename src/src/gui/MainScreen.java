@@ -134,7 +134,7 @@ public class MainScreen extends JPanel {
 				&& (fc.getSelectedFile().isFile())) {
 			File fileTraining = fc.getSelectedFile();
 			InputReader reader = new InputReader(fileTraining.getAbsolutePath());
-			Instances inst = reader.getData();
+			inst = reader.getData();
 			m_AttSummaryPanel.setRelation(inst.getRelation());
 			m_AttSummaryPanel.setNumAttributes(inst.getNumInstance());
 			m_AttSummaryPanel.setNumInstances(inst.getNumAttribute());
@@ -161,7 +161,6 @@ public class MainScreen extends JPanel {
 			if (inst !=null){
 				ViewerDialog dialog = new ViewerDialog(null);
 				dialog.setTableViewer(inst.getData(), inst.attributeName, inst.getNumAttribute(),inst.getNumInstance());
-				dialog.setVisible(true);
 			}
 		}catch (NegativeArraySizeException nase){
 			JOptionPane.showMessageDialog(MainScreen.this,
