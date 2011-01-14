@@ -1,21 +1,20 @@
 package dbscan;
 
+import java.io.File;
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
 
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.Number;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import core.DistanceFunction;
 import core.InputReader;
 import core.Instance;
-import core.DistanceFunction;
 import core.Output;
-import java.io.File;
-import java.util.Date;
-import jxl.*;
-import jxl.write.*; 
-import jxl.format.*;
-import jxl.write.Number;
 
 public class dbscan {
 
@@ -36,6 +35,22 @@ public class dbscan {
 	private KDTreeStorage teststore;
 	private int usingkd;
 	
+	public dbscan(InputReader reader, String distFunc){
+		this.DistFunc = distFunc;
+		if (0 < this.experimentType && this.experimentType < 100) {
+			int total = this.reader.numInstances;
+			int beTrained = total * this.experimentType / 100;
+			trainSet = new Instance[beTrained];
+		}else {
+			// the training is all data
+			int total = reader.data.numInstance;
+			trainSet = new Instance[total];
+			
+			for (int i = 0; i< total; i++) {
+				trainSet[i] = reader.data.getInstance(i);
+			}
+		}
+	}
 	
 	public dbscan(InputReader reader, String eps, String minPts, String distFunc, String exptype)
 	{
@@ -139,7 +154,7 @@ public class dbscan {
 	 */
 	public void RunDBSCAN()
 	{
-		
+//		System.out.print("Start\n");
 		String output="";
 		
 		if (experimentType == 101) //test on all train data
@@ -370,8 +385,8 @@ public class dbscan {
 	private boolean ExpandCluster(int ClId, int insId, Instance[] data, int[] clusterId)
 	{
 			
-
 		Vector <Integer> seeds= FindEpsNeighborhood(insId,data);
+
 		
 		int sz= seeds.size();
 		int i;
@@ -380,9 +395,21 @@ public class dbscan {
 			return false;
 		}
 		
-		for (i=0;i<sz;i++)
-			clusterId[seeds.elementAt(i)]=ClId;
-		
+		int p;
+
+		for(i=0;i<seeds.size();i++)
+		{
+				
+				if (clusterId[seeds.elementAt(i)]<=0)
+					clusterId[seeds.elementAt(i)]=ClId;
+				else
+					{
+						seeds.removeElementAt(i);
+						i--;
+						
+					}
+					
+		}
 		//remove insId
 		seeds.removeElement(insId);
 		
@@ -391,7 +418,6 @@ public class dbscan {
 			int cur= seeds.firstElement();
 			
 			Vector <Integer> result= FindEpsNeighborhood(cur,data);
-					
 				
 			if (result.size()>= MinPts)
 			{
@@ -492,7 +518,7 @@ public class dbscan {
 	private String OutputHeader()
 	{
 		String output="";
-		output +=" Run DBSCAB with parameters: \n EPS:" + this.Eps + "\n Min Points: "+this.MinPts;
+		output +=" Run DBSCAN with parameters: \n EPS:" + this.Eps + "\n Min Points: "+this.MinPts;
 		output += "\n Target class: ";
 		if (this.targetId>=0) 
 			output += this.reader.attributeNames.get(this.targetId);
@@ -569,15 +595,16 @@ public class dbscan {
 			if (clusterId[i]==-1) count++;
 		String output="";
 		
-		for(int i=0;i<data.length;i++)
-		{
-			output += "\n";
-			output += data[i].originalData;
-			output += " => Cluster ";
-			output += clusterId[i];
-			output += "\n";
+	
+	//	for(int i=0;i<data.length;i++)
+		//{
+		//	output += "\n";
+		///	output += data[i].originalData;
+		//	output += " => Cluster ";
+		//	output += clusterId[i];
+		//	output += "\n";
 			
-		}
+		//}
 		
 		output +="\n-------------------------";
 		output +="\n Number of Testing Instances: ";
@@ -604,7 +631,7 @@ public class dbscan {
 		output +="\n Number of Clusters: ";
 		output += numcluster;
 			
-		
+		/*
 		for(int i=0;i<data.length;i++)
 		{
 			output += data[i].originalData;
@@ -613,7 +640,7 @@ public class dbscan {
 			output += "\n";
 			
 		}
-		
+		*/
 		output +="\n Number of Instances: ";
 		output += data.length;
 		
@@ -822,16 +849,28 @@ public class dbscan {
 		
 
 		Vector <Integer> seeds= store.FindEpsNeighborhood(data[insId],this.Eps);
-		
-		int sz= seeds.size();
+	
+	
 		int i;
-		if (sz < MinPts) //no core point
+		if (seeds.size() < MinPts) //no core point
 		{	clusterId[insId]=-1; //noise
 			return false;
 		}
 		
-		for (i=0;i<sz;i++)
-			clusterId[seeds.elementAt(i)]=ClId;
+	
+		for(i=0;i<seeds.size();i++)
+		{
+				
+				if (clusterId[seeds.elementAt(i)]<=0)
+					clusterId[seeds.elementAt(i)]=ClId;
+				else
+					{
+						seeds.removeElementAt(i);
+						i--;
+						
+					}
+					
+		}
 		
 		//remove insId
 		seeds.removeElement(insId);
@@ -841,8 +880,7 @@ public class dbscan {
 			int cur= seeds.firstElement();
 			
 			Vector <Integer> result= store.FindEpsNeighborhood(data[cur],this.Eps);
-					
-				
+		
 			if (result.size()>= MinPts)
 			{
 				for (i=0;i<result.size();i++)

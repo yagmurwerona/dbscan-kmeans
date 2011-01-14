@@ -34,8 +34,9 @@ public class MainScreen extends JPanel {
 	ClusterPanel clusterPanel = new ClusterPanel();
 	static JFrame jf = new JFrame("Preprocess");
 	Instances inst;
-	JRadioButtonMenuItem dbscan;
+	JRadioButtonMenuItem dbScan;
 	JRadioButtonMenuItem kmeans;
+	InputReader reader;
 	public MainScreen() {
 		// Set up the GUI layout
 	    JPanel menuPanel = new JPanel();
@@ -46,10 +47,10 @@ public class MainScreen extends JPanel {
 		JMenu viewMenu = new JMenu("View");
 		JMenu runMenu = new JMenu("Run");
 		ButtonGroup group = new ButtonGroup();
-		dbscan = new JRadioButtonMenuItem("DBScan");
+		dbScan = new JRadioButtonMenuItem("DBScan");
 		kmeans = new JRadioButtonMenuItem("KMeans");
-		dbscan.setSelected(true);
-		group.add(dbscan);
+		dbScan.setSelected(true);
+		group.add(dbScan);
 		group.add(kmeans);
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
@@ -59,10 +60,12 @@ public class MainScreen extends JPanel {
 		fileMenu.add(openFile);
 		fileMenu.add(exitFile);
 		JMenuItem showData= new JMenuItem("Show data");
+		JMenuItem exportExcel= new JMenuItem("Export Excel");
 		viewMenu.add(showData);
+		viewMenu.add(exportExcel);
 		setLayout(new BorderLayout());
 	    add(menuPanel, BorderLayout.NORTH);
-	    runMenu.add(dbscan);
+	    runMenu.add(dbScan);
 	    runMenu.add(kmeans);
 	    m_AttSummaryPanel.setBorder(BorderFactory.createTitledBorder("Selected Attribute"));
 		JPanel attVis = new JPanel();
@@ -93,7 +96,7 @@ public class MainScreen extends JPanel {
 			}
 		});
 	    
-	    dbscan.addActionListener(new ActionListener() {
+	    dbScan.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				clusterPanel.setType("dbscan");
@@ -116,6 +119,13 @@ public class MainScreen extends JPanel {
 			}
 		});
 	    
+	    exportExcel.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				exportExcel();
+			}
+		});
+	    
 	    exitFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -133,7 +143,7 @@ public class MainScreen extends JPanel {
 		if ((returnVal == JFileChooser.APPROVE_OPTION)
 				&& (fc.getSelectedFile().isFile())) {
 			File fileTraining = fc.getSelectedFile();
-			InputReader reader = new InputReader(fileTraining.getAbsolutePath());
+			reader = new InputReader(fileTraining.getAbsolutePath());
 			inst = reader.getData();
 			m_AttSummaryPanel.setRelation(inst.getRelation());
 			m_AttSummaryPanel.setNumAttributes(inst.getNumInstance());
@@ -144,7 +154,7 @@ public class MainScreen extends JPanel {
 			clusterPanel.m_StartBut.setEnabled(true);
 			clusterPanel.setFlag(reader.getFlag());
 			clusterPanel.setAttributeNames(inst.getAttributeName());
-			if (dbscan.isSelected())
+			if (dbScan.isSelected())
 				clusterPanel.setType("dbscan");
 			else if (kmeans.isSelected())
 				clusterPanel.setType("kmeans");
@@ -175,11 +185,25 @@ public class MainScreen extends JPanel {
 		}
 	}
 	
+	public void exportExcel(){
+		if (inst !=null){
+			JFileChooser fcchooser = new JFileChooser();
+			fcchooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+			int returnVal = fcchooser.showSaveDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION){
+				File file = fcchooser.getSelectedFile();
+				clusterPanel.exportExcel(file.getAbsolutePath());
+			} else {
+				System.out.println("It's not saved");
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
 		try {
 			jf.getContentPane().setLayout(new BorderLayout());
-			final MainScreen sp = new MainScreen();
-			jf.getContentPane().add(sp, BorderLayout.CENTER);
+			final MainScreen mainScreen = new MainScreen();
+			jf.getContentPane().add(mainScreen, BorderLayout.CENTER);
 			jf.addWindowListener(new WindowAdapter() {
 				public void windowClosing(WindowEvent e) {
 					jf.dispose();
