@@ -780,6 +780,8 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						}
 						m_OutText.setText(km.getOutput().getContent());
 						setProgress(100);
+					}catch (NumberFormatException e){
+						errorMessage(e.getMessage());
 					} catch (Exception ex) {
 						ex.printStackTrace();
 						JOptionPane
@@ -967,19 +969,47 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
     }
     
     public String checkValues(){
+    	Double d;
     	if (getType().equals("kmeans")){
-			if (m_MaxIterationsText.getText().equals("")){
-				return "Max Iterations number should be greater than 0";
-			}else if (m_NumClustersText.getText().equals("")){
-				return "Number of clusters should be greater than 0";
-			}else if ((m_NoiseRemovalBut.isSelected() && m_ThresholdText.getText().equals(""))){
-				return "Threshold parameter should be greater than 0 and less than 100";
+			if (m_MaxIterationsText.getText().equals(""))
+				return "Max Iterations should not be null";
+			else{
+				d = Double.parseDouble(m_MaxIterationsText.getText());
+				if (d < 0)
+					return "Max Iterations number should be greater than 0 and less than 100";
+			}
+			if (m_NumClustersText.getText().equals(""))
+				return "Number of clusters should not be null";
+			else {
+				d = Double.parseDouble(m_NumClustersText.getText());
+				if (d < 0)
+					return "Number of clusters number should be greater than 0";
+			}
+			
+			if (m_NoiseRemovalBut.isSelected()){
+				if (m_ThresholdText.getText().equals(""))
+					return "Threshold parameter should not be null";
+				else {
+					d = Double.parseDouble(m_ThresholdText.getText());
+					if (d > 100 || d <= 0)
+						return "Threshold parameter should be greater than 0 and less than 100";
+				}
 			}
     	} else if (getType().equals("dbscan")) {
 			if (m_MinPointsText.getText().equals("")) {
-				return "Min points number should be greater than 0";
-			} else if (m_EpsText.getText().equals("")) {
-				return "Eps parameter should be greater than 0";
+				return "Min points number should not be null";
+			}else{
+				d = Double.parseDouble(m_MinPointsText.getText());
+				if (d < 1)
+					return "Min points number should be greater than or equal 1";
+			}
+			
+			if (m_EpsText.getText().equals("")) {
+				return "Eps parameter should not be null";
+			}else{
+				d = Double.parseDouble(m_MinPointsText.getText());
+				if (d < 0)
+					return "Eps parameter should be greater than or equal 0";
 			}
     	}
     	return "";
