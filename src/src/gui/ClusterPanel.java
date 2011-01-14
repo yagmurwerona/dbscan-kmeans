@@ -589,9 +589,9 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 	protected void stopClusterer() {
 		if (m_RunThread != null) {
 			m_RunThread.interrupt();
-			// This is deprecated (and theoretically the interrupt should do).
 			m_RunThread.stop();
 		}
+		progressBar.setValue(0);
 	}
 
 	/**
@@ -949,7 +949,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
             m_StopBut.setEnabled(false);
             progressBar.setIndeterminate(false);
             setCursor(null); //turn off the wait cursor
-            progressBar.setValue(0);
+//            progressBar.setValue(0);
         }
     }
 	
