@@ -695,6 +695,12 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
         } 
     }
     
+    public void exportExcel(String filename){
+		dbscan dbsc = new dbscan(reader, m_DistanceFunctionCombo.getSelectedItem()
+				.toString());
+		dbsc.SuggestEps(4, filename + ".xls");
+	}
+    
     /**
 	 * Starts running the currently configured clusterer with the current
 	 * settings. This is run in a separate thread, and will only start if there
@@ -715,7 +721,6 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
             setProgress(0);
             String message = checkValues();
 			if (!message.equals("")) {
-				System.out.println("----:" + message);
 				errorMessage(message);
 			} else {
 				if (fileTraining != null && getType().equals("kmeans")) {
@@ -895,6 +900,9 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						dbscan dbsc = new dbscan(reader, m_EpsText.getText(),
 								m_MinPointsText.getText(), distfunc,
 								experimenttype);
+						if (sp.getReader() != null && experimenttype.equals("102")) {
+							dbsc.setTestfile(sp.getReader());
+						}
 						dbsc.setTarget("-1");
 						dbsc.setUsingKD(usingkd);
 						if (experimenttype.equals("102"))
@@ -910,7 +918,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 						dbsc.preProcessing();
 						progress += random.nextInt(20);
 						setProgress(Math.min(progress, 99));
-						// dbsc.SuggestEps(4, "eps_test.xls");
+//						dbsc.SuggestEps(4,fileTraining + "eps.xls");
 						dbsc.RunDBSCAN();
 						m_OutText.setText(dbsc.getOutput().getContent());
 						setProgress(100);
@@ -928,7 +936,7 @@ public class ClusterPanel extends JPanel implements ActionListener,PropertyChang
 			progress=0;
             return null;
         }
-
+		
         /*
          * Executed in event dispatching thread
          */
