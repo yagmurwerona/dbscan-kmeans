@@ -1,8 +1,18 @@
-#This is the DBScan and Kmeans implementation with GUI on Java
+#This is the DBScan and Kmeans implementation with GUI on Java, just for purposes of experiments.
 
 = Introduction =
-We implement DBScan and Kmeans for experiments in Data Mining.
-Note: this version works properly
+This is the DBScan and Kmeans implementation with GUI on Java, just for purposes of experiments.
+We implement DBScan and Kmeans for experiments in Data Mining. We use some advanced data structures to make the program runs fast.
+
+We used it for the project works of Data Mining course.
+_Note: the current version (r.42) works properly_
 
 = Some Details =
-The input format follows ARFF format of Weka
+The input format follows ARFF format of Weka.
+= Contact =
+Drop me a line if you found some issues or need some information from me. Unfortunately, I received much more emails than I can answer. But I will try to reply at my most convenience.
+
+Giang Binh Tran
+VLT Technologies
+
+Vilangtek.com
