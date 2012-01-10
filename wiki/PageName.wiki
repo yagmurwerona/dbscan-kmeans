@@ -10,9 +10,10 @@ _Note: the current version (r.42) works properly_
 = Some Details =
 The input format follows ARFF format of Weka.
 = Contact =
-Drop me a line if you found some issues or need some information from me. Unfortunately, I received much more emails than I can answer. But I will try to reply at my most convenience.
+Drop us a line if you found some issues or need some information from me. Unfortunately, sometimes  we received much more emails than w can answer due to our jobs. But we will try to reply at our most convenience.
 
-Giang Binh Tran
+Team: Giang Binh Tran, Quynh Do Thi Ngoc and Linh Tri Nguyen
+
+--------------
 VLT Technologies
-
 Vilangtek.com
