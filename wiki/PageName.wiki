@@ -1,0 +1,8 @@
+#This is the DBScan and Kmeans implementation with GUI on Java
+
+= Introduction =
+We implement DBScan and Kmeans for experiments in Data Mining.
+Note: this version works properly
+
+= Some Details =
+The input format follows ARFF format of Weka
