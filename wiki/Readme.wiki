@@ -3,7 +3,7 @@
 = Introduction =
 We implement DBScan and Kmeans for experiments in Data Mining. We use some advanced data structures to make the program run fast.
 
-We used it for the project works of Data Mining course (2010)
+We used it for the project works of Data Mining course (Uni. Bolzano, 2010)
 _Note: the current version (r.42) works properly_
 
 = Some Details =
